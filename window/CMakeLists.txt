@@ -19,7 +19,7 @@ set(
 
 
 # Includes
-include_directories(include)
+include_directories(include ../shared/include)
 if (!WIN32)
     include_directories(${GLFW_INCLUDE_DIRS})
     include_directories(${OPENGL_INCLUDE_DIRS})
@@ -31,6 +31,13 @@ endif()
 # Executable file
 add_executable(window ${sources_list})
 set_target_properties(window PROPERTIES OUTPUT_NAME "podracer-window")
+
+
+# Shared classes
+if (NOT TARGET podracershared)
+    add_subdirectory(../shared shared)
+endif ()
+target_link_libraries(window podracershared)
 
 
 # Libraries
