@@ -7,6 +7,10 @@ set(
     sources_list
 
     src/Messaging.cpp
+    src/Message.cpp
+    src/Turn.cpp
+    src/Settings.cpp
+    src/Action.cpp
 )
 
 

@@ -1,4 +1,4 @@
- # -*- coding: Utf-8 -*- 
+ # -*- coding: Utf-8 -*-
 from queue import Queue
 from threading import Thread
 import subprocess
@@ -34,7 +34,7 @@ class Program(object):
             content = ""
             for line in self.process.stdout:
                 if debug: print("<"+self.name, line, sep=" : ",end="")
-                if current_label :
+                if current_label:
                     if line.startswith("START"):
                         print(self.name,": current label not completed (STOP expected)", file=stderr)
                         break
@@ -42,7 +42,7 @@ class Program(object):
                         label =  line.strip().split(maxsplit=1)
                         if len(label) == 1 or label[1] == current_label:
                             if debug: print("QUEUE",self.name,(current_label, content))
-           
+
                             self.queue.put((current_label, content))
                             current_label = None
                             content = ""
@@ -61,10 +61,10 @@ class Program(object):
                 else :
                     print(self.name," : no label started (START expected)", file=stderr)
                     break
-            if debug: 
+            if debug:
                 print(self.name, "stop reading", sep=" : ")
-            
-        
+
+
             self.stop()
 
         self.thread = Thread(target=target)
@@ -88,13 +88,13 @@ class Program(object):
 
 
     def read(self, label,error_intolerant=False):
-        if debug: print("'%s' : read label '%s'"%(self.name, label))        
+        if debug: print("'%s' : read label '%s'"%(self.name, label))
         while not self.queue.empty():
             item = self.queue.get()
             if debug: print("DEQUEUE",self.name,item)
-           
+
             if item[0] == label:
-                if debug: print(item[1],end="") 
+                if debug: print(item[1],end="")
                 return item[1]
             elif error_intolerant:
                 print(self.name," : expected label '%s' instead of '%s'"%(label, item[0]), file=stderr)
@@ -114,10 +114,10 @@ class Program(object):
             if debug:
                 print(">"+self.name,line, sep=" : ")
             self.process.stdin.write(line+"\n")
-       
+
         self.process.stdin.write("STOP %s\n"%label)
         if debug: print(">"+self.name, "STOP %s"%label, sep=" : ")
-       
+
 
 
 class PlayerProgram(Program):
@@ -128,7 +128,7 @@ class PlayerProgram(Program):
         self.write("player", str(number))
 
     def read_action(self, turn):
-        return self.read("action", True) 
+        return self.read("action", True)
 
     def write_turn(self, turn, content):
         self.write("turn", content)
@@ -136,41 +136,51 @@ class PlayerProgram(Program):
 
 
 class GameEngineProgram(Program):
-    
     def __init__(self, command, players):
         Program.__init__(self, "GameEngine", command)
         self.write("players", str(players))
 
     def read_turn(self, turn, player):
-        instructions = self.read("turn %d %d"%(turn, player), True) 
+        instructions = self.read("turn %d %d"%(turn, player), True)
         while not instructions and self.is_running():
             time.sleep(timeout/1000)
-            instructions = self.read("turn %d %d"%(turn, player), True) 
+            instructions = self.read("turn %d %d"%(turn, player), True)
 
-        if debug or display : 
-            print("-"*80)
+        if debug or display:
+            print("-" * 80)
             print(instructions)
-        return instructions    
+        return instructions
 
     def read_settings(self):
         if debug: print(self.name, "READ SETTINGS", sep=" : ")
-      
-        instructions = self.read("settings", True) 
+
+        instructions = self.read("settings", True)
         while instructions == None and self.is_running():
             time.sleep(timeout/100)
-            instructions = self.read("settings", True) 
+            instructions = self.read("settings", True)
 
-        print("="*80)
+        print("=" * 80)
         print(instructions)
         if debug: print(self.name, "READ SETTINGS DONE", sep=" : ")
-      
-        return instructions    
+
+        return instructions
 
 
     def write_actions(self, turn, player, actions):
         if not actions:
             actions = "NOACTION"
         self.write("actions %d %d"%(turn,player), actions)
+
+
+
+class WindowProgram(Program):
+    def __init__(self, command):
+        Program.__init__(self, "Window", command)
+
+    def write_turn(self, turn, content):
+        self.write("turn", content)
+
+
 
 fails = 0
 winner = -1
@@ -186,12 +196,15 @@ if __name__ == "__main__":
 
     with open(argv[1]) as config:
         game_engine_command = config.readline().strip()
+        window_command = config.readline().strip()
         players_commands = [line.strip() for line in config]
         players = [PlayerProgram(cmd,i) for i,cmd in enumerate(players_commands,1)]
         game_engine = GameEngineProgram(game_engine_command, len(players_commands))
+        window = WindowProgram(window_command)
         settings = game_engine.read_settings()
         if debug:
             print("SETTINGS :",settings, file=stderr)
+        window.write("settings", settings)
         for p in players:
             p.write("settings", settings)
     turn = 1
@@ -199,12 +212,12 @@ if __name__ == "__main__":
 
         for nb,p in enumerate(players,1):
             turn_instructions = game_engine.read_turn(turn, nb)
-            if display : 
+            if display:
                 print(turn)
             p.write_turn(turn, turn_instructions)
             time.sleep(0.001)
             player_action = p.read_action(turn)
-            if display : 
+            if display:
                 print(nb,player_action)
             if not player_action:
                 fails+=1
@@ -216,4 +229,4 @@ if __name__ == "__main__":
     for p in players:
         p.stop()
     print(winner)
-    
+

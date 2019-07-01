@@ -1,10 +1,37 @@
+#include <iostream>
 #include <SFML/Graphics.hpp>
 
+#include "Settings.h"
+#include "Messaging.h"
+#include "TextureLoader.h"
+
+#include "Action.h"
+#include "Turn.h"
+
 int main() {
+    Messaging messaging;
+    TextureLoader textureLoader;
+
     sf::RenderWindow window(sf::VideoMode(800, 600), L"Ｐ Ｏ Ｄ 　Ｒ Ａ Ｃ Ｅ Ｒ");
     window.setVerticalSyncEnabled(true);
     sf::Event event {};
     sf::Color clearColor(40, 40, 40);
+
+    sf::Sprite sprite;
+    sprite.scale(sf::Vector2f(0.075f, 0.075f));
+    sprite.setTexture(textureLoader.get("car_3/01"));
+    sf::FloatRect bounds = sprite.getLocalBounds();
+    sprite.setOrigin(bounds.width / 2.0f, bounds.height / 2.0f);
+    sprite.setPosition(100, 100);
+
+    Settings settings;
+    messaging.setOnMessageEvent("players", [](Messaging &m, const Messaging::Values &values) {
+    });
+    messaging.setOnMessageEvent("settings", [&](Messaging &m, const Messaging::Values &values) {
+        settings = Settings::parse(values);
+        m.output(settings.toMessage());
+    });
+    messaging.start();
 
     while (window.isOpen()) {
         while (window.pollEvent(event)) {
@@ -22,7 +49,7 @@ int main() {
 
         window.clear(clearColor);
 
-        // Draw here
+        window.draw(sprite);
 
         window.display();
     }

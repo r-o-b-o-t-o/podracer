@@ -15,7 +15,13 @@ set(
     sources_list
 
     src/main.cpp
+    src/TextureLoader.cpp
 )
+
+
+# Assets
+set(assets_dir ${CMAKE_CURRENT_SOURCE_DIR}/../assets)
+file(GLOB_RECURSE assets "${assets_dir}/*")
 
 
 # Includes
@@ -31,6 +37,15 @@ endif()
 # Executable file
 add_executable(window ${sources_list})
 set_target_properties(window PROPERTIES OUTPUT_NAME "podracer-window")
+
+
+# Copy assets to target location
+foreach (file ${assets})
+    if (NOT IS_DIRECTORY ${file})
+        STRING(REGEX REPLACE "^${assets_dir}/" "" file_dest_name ${file})
+        configure_file(${file} ${CMAKE_CURRENT_BINARY_DIR}/assets/${file_dest_name} COPYONLY)
+    endif ()
+endforeach ()
 
 
 # Shared classes

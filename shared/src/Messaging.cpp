@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sstream>
+#include <iterator>
 
 #include "../include/Messaging.h"
 
@@ -38,6 +40,10 @@ void Messaging::output(const std::string &message, const std::vector<std::string
     this->writeMutex.unlock();
 }
 
+void Messaging::output(const Message &message) {
+    this->output(message.getType(), message.getValues());
+}
+
 void Messaging::setOnMessageEvent(const std::string &message, Messaging::CallbackFunction fn) {
     this->onMessage[message] = std::move(fn);
 }
@@ -55,7 +61,7 @@ void Messaging::work() {
         if (this->currentMessage.empty() && line.rfind("START ", 0) == 0) {
             std::string messageName = line.substr(6); // Rest of the line after "START "
             this->currentMessage = messageName;
-            this->inputs[messageName] = std::vector<std::string>();
+            this->inputs[messageName] = std::vector<std::vector<std::string>>();
         } else if (!this->currentMessage.empty()) {
             if (line.rfind("STOP " + this->currentMessage) == 0) {
                 if (this->onMessage.find(this->currentMessage) != this->onMessage.end()) {
@@ -63,7 +69,11 @@ void Messaging::work() {
                 }
                 this->currentMessage = "";
             } else {
-                this->inputs[this->currentMessage].push_back(line);
+                std::istringstream iss(line);
+                std::vector<std::string> split {
+                    std::istream_iterator<std::string>(iss), {}
+                };
+                this->inputs[this->currentMessage].push_back(split);
             }
         }
     }
