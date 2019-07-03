@@ -11,6 +11,7 @@ set(
     src/Turn.cpp
     src/Settings.cpp
     src/Action.cpp
+    src/Random.cpp
 )
 
 

@@ -4,18 +4,20 @@
 #include <string>
 #include <vector>
 
-class Message {
-public:
-    Message(const std::string &type);
-    void addValue(const std::string &v);
+namespace Shared {
+    class Message {
+    public:
+        Message(const std::string &type);
+        void addValue(const std::string &v);
 
-    const std::string &getType() const;
-    const std::vector<std::string> &getValues() const;
+        const std::string &getType() const;
+        const std::vector<std::string> &getValues() const;
 
-private:
-    std::string type;
-    std::vector<std::string> values;
+    private:
+        std::string type;
+        std::vector<std::string> values;
 
-};
+    };
+}
 
 #endif

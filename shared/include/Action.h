@@ -6,21 +6,23 @@
 
 #include "Messaging.h"
 
-struct PodAction {
-    float rotation;
-    float throttle;
-};
+namespace Shared {
+    struct PodAction {
+        float rotation;
+        float throttle;
+    };
 
-class Action {
-public:
-    static Action parse(const Messaging::Values &values);
-    Message toMessage();
+    class Action {
+    public:
+        static Action parse(const Messaging::Values &values);
+        Message toMessage();
 
-    const PodAction &getPodAction(unsigned long long podIdx);
-    const std::vector<PodAction> &getActions() const;
+        const PodAction &getPodAction(unsigned long long podIdx);
+        const std::vector<PodAction> &getActions() const;
 
-private:
-    std::vector<PodAction> actions;
-};
+    private:
+        std::vector<PodAction> actions;
+    };
+}
 
 #endif

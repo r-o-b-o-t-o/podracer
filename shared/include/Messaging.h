@@ -9,30 +9,32 @@
 
 #include "Message.h"
 
-class Messaging {
-public:
-    typedef std::vector<std::vector<std::string>> Values;
-    typedef std::function<void(Messaging &m, const Values &values)> CallbackFunction;
+namespace Shared {
+    class Messaging {
+    public:
+        typedef std::vector<std::vector<std::string>> Values;
+        typedef std::function<void(Messaging &m, const Values &values)> CallbackFunction;
 
-    Messaging();
-    ~Messaging();
-    void start();
-    void stop();
-    void output(const std::string &message, const std::vector<std::string> &values);
-    void output(const Message &message);
-    void setOnMessageEvent(const std::string &message, CallbackFunction fn);
+        Messaging();
+        ~Messaging();
+        void start();
+        void stop();
+        void output(const std::string &message, const std::vector<std::string> &values);
+        void output(const Message &message);
+        void setOnMessageEvent(const std::string &message, CallbackFunction fn);
 
-private:
-    void work();
+    private:
+        void work();
 
-    std::thread thread;
-    std::atomic<bool> run;
+        std::thread thread;
+        std::atomic<bool> run;
 
-    std::map<std::string, Values> inputs;
-    std::map<std::string, CallbackFunction> onMessage;
-    std::string currentMessage;
+        std::map<std::string, Values> inputs;
+        std::map<std::string, CallbackFunction> onMessage;
+        std::string currentMessage;
 
-    std::mutex writeMutex;
-};
+        std::mutex writeMutex;
+    };
+}
 
 #endif

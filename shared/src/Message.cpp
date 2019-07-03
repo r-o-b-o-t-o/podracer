@@ -1,18 +1,20 @@
 #include "Message.h"
 
-Message::Message(const std::string &type) :
-    type(type) {
+namespace Shared {
+    Message::Message(const std::string &type) :
+            type(type) {
 
-}
+    }
 
-void Message::addValue(const std::string &v) {
-    this->values.push_back(v);
-}
+    void Message::addValue(const std::string &v) {
+        this->values.push_back(v);
+    }
 
-const std::string &Message::getType() const {
-    return this->type;
-}
+    const std::string &Message::getType() const {
+        return this->type;
+    }
 
-const std::vector<std::string> &Message::getValues() const {
-    return this->values;
+    const std::vector<std::string> &Message::getValues() const {
+        return this->values;
+    }
 }

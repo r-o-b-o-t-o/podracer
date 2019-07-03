@@ -1,15 +1,18 @@
+#include <vector>
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+#include "Pod.h"
+#include "Turn.h"
+#include "Wall.h"
 #include "Settings.h"
-#include "Messaging.h"
+#include "Checkpoint.h"
 #include "TextureLoader.h"
 
-#include "Action.h"
-#include "Turn.h"
+using namespace Window;
 
 int main() {
-    Messaging messaging;
+    Shared::Messaging messaging;
     TextureLoader textureLoader;
 
     sf::RenderWindow window(sf::VideoMode(800, 600), L"Ｐ Ｏ Ｄ 　Ｒ Ａ Ｃ Ｅ Ｒ");
@@ -17,19 +20,61 @@ int main() {
     sf::Event event {};
     sf::Color clearColor(40, 40, 40);
 
-    sf::Sprite sprite;
-    sprite.scale(sf::Vector2f(0.075f, 0.075f));
-    sprite.setTexture(textureLoader.get("car_3/01"));
-    sf::FloatRect bounds = sprite.getLocalBounds();
-    sprite.setOrigin(bounds.width / 2.0f, bounds.height / 2.0f);
-    sprite.setPosition(100, 100);
+    Shared::Settings settings;
+    int numberOfPlayers = -1;
+    bool loadedSettings = false;
+    std::vector<Pod> pods;
+    std::vector<Wall> walls;
+    std::vector<Checkpoint> checkpoints;
 
-    Settings settings;
-    messaging.setOnMessageEvent("players", [](Messaging &m, const Messaging::Values &values) {
+    auto start = [&]() {
+        int numberOfPods = numberOfPlayers * settings.getPodsPerPlayer();
+        pods.clear();
+
+        for (int i = 0; i < numberOfPods; ++i) {
+            pods.emplace_back(textureLoader);
+        }
+
+        for (const Shared::Wall &wall : settings.getWalls()) {
+            walls.emplace_back(textureLoader, wall.centerX, wall.centerY, wall.radius);
+        }
+        for (const Shared::Checkpoint &checkpoint : settings.getCheckpoints()) {
+            checkpoints.emplace_back(textureLoader, checkpoint.centerX, checkpoint.centerY, checkpoint.radius);
+        }
+    };
+
+    messaging.setOnMessageEvent("settings", [&](Shared::Messaging &m, const Shared::Messaging::Values &values) {
+        settings = Shared::Settings::parse(values);
+        window.setSize(sf::Vector2u(static_cast<unsigned int>(settings.getWidth()),
+                                    static_cast<unsigned int>(settings.getHeight())));
+        loadedSettings = true;
+
+        if (numberOfPlayers != -1) {
+            start();
+        }
     });
-    messaging.setOnMessageEvent("settings", [&](Messaging &m, const Messaging::Values &values) {
-        settings = Settings::parse(values);
-        m.output(settings.toMessage());
+    messaging.setOnMessageEvent("players", [&](Shared::Messaging &m, const Shared::Messaging::Values &values) {
+        numberOfPlayers = std::stoi(values[0][0]);
+        if (loadedSettings) {
+            start();
+        }
+    });
+    messaging.setOnMessageEvent("turn", [&](Shared::Messaging &m, const Shared::Messaging::Values &values) {
+        Shared::Turn turn = Shared::Turn::parse(values);
+
+        int playerIdx = 0;
+        for (auto &playerState : turn.getPlayerStates()) {
+            int podIdx = 0;
+            for (const Shared::State &podState : playerState) {
+                Pod &pod = pods[playerIdx * podIdx];
+                pod.setHealth(podState.health);
+                pod.setPosition(podState.x, podState.y);
+                pod.setRotation(podState.direction);
+
+                ++podIdx;
+            }
+            ++playerIdx;
+        }
     });
     messaging.start();
 
@@ -49,7 +94,15 @@ int main() {
 
         window.clear(clearColor);
 
-        window.draw(sprite);
+        for (const Pod &pod : pods) {
+            window.draw(pod.getSprite());
+        }
+        for (const Wall &wall : walls) {
+            window.draw(wall.getSprite());
+        }
+        for (const Checkpoint &checkpoint : checkpoints) {
+            window.draw(checkpoint.getSprite());
+        }
 
         window.display();
     }

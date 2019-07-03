@@ -143,7 +143,7 @@ class GameEngineProgram(Program):
     def read_turn(self, turn, player):
         instructions = self.read("turn %d %d"%(turn, player), True)
         while not instructions and self.is_running():
-            time.sleep(timeout/1000)
+            time.sleep(timeout / 1000)
             instructions = self.read("turn %d %d"%(turn, player), True)
 
         if debug or display:
@@ -203,14 +203,15 @@ if __name__ == "__main__":
         window = WindowProgram(window_command)
         settings = game_engine.read_settings()
         if debug:
-            print("SETTINGS :",settings, file=stderr)
+            print("SETTINGS :", settings, file=stderr)
+        window.write("players", str(len(players_commands)))
         window.write("settings", settings)
         for p in players:
             p.write("settings", settings)
     turn = 1
-    while game_engine.is_running():
 
-        for nb,p in enumerate(players,1):
+    while game_engine.is_running():
+        for nb,p in enumerate(players, 1):
             turn_instructions = game_engine.read_turn(turn, nb)
             if display:
                 print(turn)
@@ -220,7 +221,7 @@ if __name__ == "__main__":
             if display:
                 print(nb,player_action)
             if not player_action:
-                fails+=1
+                fails += 1
                 if fails > 10:
                     break
             game_engine.write_actions(turn, nb,player_action)
@@ -229,4 +230,3 @@ if __name__ == "__main__":
     for p in players:
         p.stop()
     print(winner)
-
