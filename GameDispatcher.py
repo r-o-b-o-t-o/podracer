@@ -1,10 +1,10 @@
  # -*- coding: Utf-8 -*-
 from queue import Queue
 from threading import Thread
-import subprocess
-import time
+import os
 import sys
-from sys import stderr,argv
+import time
+import subprocess
 from inspect import currentframe, getframeinfo
 debug = False
 display = False
@@ -27,7 +27,8 @@ class Program(object):
                 self.params,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=stderr,
+                stderr=sys.stderr,
+                cwd=os.path.dirname(os.path.realpath(self.params[0])) ,
                 universal_newlines=True,
                 bufsize=1)
             if debug: print(self.name, "start reading", sep=" : ")
@@ -37,7 +38,7 @@ class Program(object):
                 if debug: print("<"+self.name, line, sep=" : ",end="")
                 if current_label:
                     if line.startswith("START"):
-                        print(self.name,": current label not completed (STOP expected)", file=stderr)
+                        print(self.name,": current label not completed (STOP expected)", file=sys.stderr)
                         break
                     elif line.startswith("STOP"):
                         label =  line.strip().split(maxsplit=1)
@@ -48,7 +49,7 @@ class Program(object):
                             current_label = None
                             content = ""
                         else :
-                            print(self.name,": 'STOP' label not corresponding to '%s'"%current_label, file=stderr)
+                            print(self.name,": 'STOP' label not corresponding to '%s'"%current_label, file=sys.stderr)
                             break
                     else :
                         content+=line
@@ -57,10 +58,10 @@ class Program(object):
                     if len(label) == 2:
                         current_label = label[1]
                     else:
-                        print(self.name,": 'START' must be followed by a label", file=stderr)
+                        print(self.name,": 'START' must be followed by a label", file=sys.stderr)
                         break
                 else :
-                    print(self.name," : no label started (START expected)", file=stderr)
+                    print(self.name," : no label started (START expected)", file=sys.stderr)
                     break
             if debug:
                 print(self.name, "stop reading", sep=" : ")
@@ -98,9 +99,8 @@ class Program(object):
                 if debug: print(item[1],end="")
                 return item[1]
             elif error_intolerant:
-                print(self.name," : expected label '%s' instead of '%s'"%(label, item[0]), file=stderr)
-                #sys.exit(1)
-                #self.stop()
+                print(self.name," : expected label '%s' instead of '%s'"%(label, item[0]), file=sys.stderr)
+                self.stop()
                 break
         return None
 
@@ -179,7 +179,7 @@ class WindowProgram(Program):
     def __init__(self, command):
         Program.__init__(self, "Window", command)
 
-    def write_turn(self, turn, content):
+    def write_turn(self, content):
         self.write("turn", content)
 
 
@@ -187,27 +187,27 @@ class WindowProgram(Program):
 fails = 0
 winner = -1
 if __name__ == "__main__":
-    if len(argv) == 1:
+    if len(sys.argv) == 1:
         print("configFile name required in first argument")
         quit()
     game_engine = None
     players = []
-    debug = "debug" in map(str.lower,argv[1:])
-    display = "display" in map(str.lower,argv[1:])
+    debug = "debug" in map(str.lower, sys.argv[1:])
+    display = "display" in map(str.lower, sys.argv[1:])
 
 
-    with open(argv[1]) as config:
+    with open(sys.argv[1]) as config:
         game_engine_command = config.readline().strip()
         window_command = config.readline().strip()
         players_commands = [line.strip() for line in config]
-        players = [PlayerProgram(cmd,i) for i,cmd in enumerate(players_commands,1)]
+        players = [PlayerProgram(cmd, i) for i, cmd in enumerate(players_commands, 1)]
         game_engine = GameEngineProgram(game_engine_command, len(players_commands))
         window = WindowProgram(window_command)
         settings = game_engine.read_settings()
         if debug:
-            print("SETTINGS :", settings, file=stderr)
-        window.write("players", str(len(players_commands)))
+            print("SETTINGS :", settings, file=sys.stderr)
         window.write("settings", settings)
+        window.write("players", str(len(players_commands)))
         for p in players:
             p.write("settings", settings)
     turn = 1
@@ -217,8 +217,9 @@ if __name__ == "__main__":
             turn_instructions = game_engine.read_turn(turn, nb)
             if display:
                 print(turn)
+            if nb == 1:
+                window.write_turn(turn_instructions)
             p.write_turn(turn, turn_instructions)
-            time.sleep(0.001)
             player_action = p.read_action(turn)
             if display:
                 print(nb,player_action)
@@ -226,7 +227,7 @@ if __name__ == "__main__":
                 fails += 1
                 if fails > 10:
                     break
-            game_engine.write_actions(turn, nb,player_action)
+            game_engine.write_actions(turn, nb, player_action)
         turn += 1
 
     for p in players:

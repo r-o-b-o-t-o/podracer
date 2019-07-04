@@ -84,6 +84,10 @@ namespace Shared {
         return this->playerStates.at(playerIdx).size();
     }
 
+    unsigned long Turn::getTurn() const {
+        return this->turnIdx;
+    }
+
     void Turn::nextTurn() {
         this->turnIdx++;
     }

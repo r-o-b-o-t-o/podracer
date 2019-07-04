@@ -1,6 +1,12 @@
 #include "Action.h"
 
 namespace Shared {
+    Action::Action(int pods) {
+        for (int i = 0; i < pods; ++i) {
+            this->actions.emplace_back();
+        }
+    }
+
     Action Action::parse(const Messaging::Values &values) {
         Action a {};
 
@@ -36,7 +42,11 @@ namespace Shared {
         return m;
     }
 
-    const PodAction &Action::getPodAction(unsigned long long podIdx) {
+    const PodAction &Action::getPodAction(unsigned long long podIdx) const {
+        return this->actions.at(podIdx);
+    }
+
+    PodAction &Action::getPodAction(unsigned long long podIdx) {
         return this->actions.at(podIdx);
     }
 

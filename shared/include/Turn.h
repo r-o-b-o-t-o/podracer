@@ -26,6 +26,7 @@ namespace Shared {
         const std::vector<State> &getPlayerState(unsigned long long playerIdx) const;
         std::vector<State> &getPlayerState(unsigned long long playerIdx);
         const State &getPodState(unsigned long long playerIdx, unsigned long long podIdx) const;
+        unsigned long getTurn() const;
         void nextTurn();
 
     private:

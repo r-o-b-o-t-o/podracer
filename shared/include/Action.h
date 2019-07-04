@@ -14,10 +14,12 @@ namespace Shared {
 
     class Action {
     public:
+        Action(int pods = 0);
         static Action parse(const Messaging::Values &values);
         Message toMessage();
 
-        const PodAction &getPodAction(unsigned long long podIdx);
+        const PodAction &getPodAction(unsigned long long podIdx) const;
+        PodAction &getPodAction(unsigned long long podIdx);
         const std::vector<PodAction> &getActions() const;
 
     private:

@@ -1,5 +1,4 @@
 #include <vector>
-#include <iostream>
 #include <SFML/Graphics.hpp>
 
 #include "Pod.h"
@@ -22,12 +21,17 @@ int main() {
 
     Shared::Settings settings;
     int numberOfPlayers = -1;
-    bool loadedSettings = false;
     std::vector<Pod> pods;
     std::vector<Wall> walls;
     std::vector<Checkpoint> checkpoints;
 
-    auto start = [&]() {
+    messaging.read("settings", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
+        settings = Shared::Settings::parse(values);
+        window.setSize(sf::Vector2u(static_cast<unsigned int>(settings.getWidth()),
+                                    static_cast<unsigned int>(settings.getHeight())));
+    });
+    messaging.read("players", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
+        numberOfPlayers = std::stoi(values[0][0]);
         int numberOfPods = numberOfPlayers * settings.getPodsPerPlayer();
         pods.clear();
 
@@ -41,43 +45,7 @@ int main() {
         for (const Shared::Checkpoint &checkpoint : settings.getCheckpoints()) {
             checkpoints.emplace_back(textureLoader, checkpoint.centerX, checkpoint.centerY, checkpoint.radius);
         }
-    };
-
-    messaging.setOnMessageEvent("settings", [&](Shared::Messaging &m, const Shared::Messaging::Values &values, const std::smatch &match) {
-        settings = Shared::Settings::parse(values);
-        window.setSize(sf::Vector2u(static_cast<unsigned int>(settings.getWidth()),
-                                    static_cast<unsigned int>(settings.getHeight())));
-        loadedSettings = true;
-
-        if (numberOfPlayers != -1) {
-            start();
-        }
     });
-    messaging.setOnMessageEvent("players", [&](Shared::Messaging &m, const Shared::Messaging::Values &values, const std::smatch &match) {
-        numberOfPlayers = std::stoi(values[0][0]);
-        if (loadedSettings) {
-            start();
-        }
-    });
-    messaging.setOnMessageEvent("turn \\d \\d", [&](Shared::Messaging &m, const Shared::Messaging::Values &values, const std::smatch &match) {
-        Shared::Turn turn = Shared::Turn::parse(values);
-        int turnIdx = std::stoi(match.str(1));
-
-        int playerIdx = 0;
-        for (auto &playerState : turn.getPlayerStates()) {
-            int podIdx = 0;
-            for (const Shared::State &podState : playerState) {
-                Pod &pod = pods[playerIdx * podIdx];
-                pod.setHealth(podState.health);
-                pod.setPosition(podState.x, podState.y);
-                pod.setRotation(podState.direction);
-
-                ++podIdx;
-            }
-            ++playerIdx;
-        }
-    });
-    messaging.start();
 
     while (window.isOpen()) {
         while (window.pollEvent(event)) {
@@ -106,6 +74,24 @@ int main() {
         }
 
         window.display();
+
+        messaging.read("turn", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
+            Shared::Turn turn = Shared::Turn::parse(values);
+
+            int playerIdx = 0;
+            for (auto &playerState : turn.getPlayerStates()) {
+                int podIdx = 0;
+                for (const Shared::State &podState : playerState) {
+                    Pod &pod = pods[settings.getPodsPerPlayer() * playerIdx + podIdx];
+                    pod.setHealth(podState.health);
+                    pod.setPosition(static_cast<int>(podState.x), static_cast<int>(podState.y));
+                    pod.setRotation(podState.direction);
+
+                    ++podIdx;
+                }
+                ++playerIdx;
+            }
+        });
     }
 
     return 0;
