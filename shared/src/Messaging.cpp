@@ -1,8 +1,10 @@
 #include <iostream>
 #include <sstream>
-#include <iterator>
+#include <fstream>
 
 #include "Messaging.h"
+
+#define DEBUG_MESSAGING true
 
 namespace Shared {
     Messaging::Messaging() {
@@ -38,6 +40,18 @@ namespace Shared {
         }
         std::cout << "STOP " << message << std::endl;
 
+        if (DEBUG_MESSAGING) {
+            std::ofstream f;
+            f.open("messaging.log", std::ios::app);
+            f << ">>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+            f << "START " << message << std::endl;
+            for (const std::string &v : values) {
+                f << v << std::endl;
+            }
+            f << "STOP " << message << std::endl;
+            f << ">>>>>>>>>>>>>>>>>>>>>>>" << std::endl << std::endl;
+        }
+
         this->writeMutex.unlock();
     }
 
@@ -64,11 +78,31 @@ namespace Shared {
                 this->currentMessage = messageName;
                 this->inputs[messageName] = std::vector<std::vector<std::string>>();
             } else if (!this->currentMessage.empty()) {
-                if (line.rfind("STOP " + this->currentMessage) == 0) {
-                    if (this->onMessage.find(this->currentMessage) != this->onMessage.end()) {
-                        this->onMessage[this->currentMessage](*this, this->inputs[this->currentMessage]);
+                if (line.rfind("STOP ") == 0) {
+                    for (auto &callback : this->onMessage) {
+                        std::regex re(callback.first);
+                        std::smatch match;
+                        if (std::regex_search(this->currentMessage, match, re)) {
+                            callback.second(*this, this->inputs[this->currentMessage], match);
+                            this->currentMessage = "";
+                            break;
+                        }
                     }
-                    this->currentMessage = "";
+
+                    if (DEBUG_MESSAGING) {
+                        std::ofstream f;
+                        f.open("messaging.log", std::ios::app);
+                        f << "<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+                        f << "START " << this->currentMessage << std::endl;
+                        for (const std::vector<std::string> &values : this->inputs[this->currentMessage]) {
+                            for (const std::string &v : values) {
+                                f << v << " ";
+                            }
+                            f << std::endl;
+                        }
+                        f << "STOP " << this->currentMessage << std::endl;
+                        f << "<<<<<<<<<<<<<<<<<<<<<<<" << std::endl << std::endl;
+                    }
                 } else {
                     std::istringstream iss(line);
                     std::vector<std::string> split {

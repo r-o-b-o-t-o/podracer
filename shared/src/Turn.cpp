@@ -1,8 +1,13 @@
 #include <sstream>
+#include <cmath>
 
 #include "Turn.h"
 
 namespace Shared {
+    Turn::Turn() :
+            turnIdx(1) {
+    }
+
     Turn Turn::parse(const Messaging::Values &values) {
         Turn turn {};
         for (auto it = values.begin(); it < values.end(); ++it) {
@@ -27,8 +32,8 @@ namespace Shared {
         return turn;
     }
 
-    Message Turn::toMessage() {
-        Message m("turn");
+    Message Turn::toMessage(int player) {
+        Message m("turn " + std::to_string(this->turnIdx) + " " + std::to_string(player));
 
         for (int playerIdx = 0; playerIdx < this->playerStates.size(); ++playerIdx) {
             const std::vector<State> &states = this->playerStates[playerIdx];
@@ -38,8 +43,8 @@ namespace Shared {
 
                 stream << playerIdx + 1 << " ";
                 stream << podIdx + 1 << " ";
-                stream << state.x << " ";
-                stream << state.y << " ";
+                stream << static_cast<int>(std::round(state.x)) << " ";
+                stream << static_cast<int>(std::round(state.y)) << " ";
                 stream << state.vx << " ";
                 stream << state.vy << " ";
                 stream << state.direction << " ";
@@ -55,7 +60,15 @@ namespace Shared {
         return this->playerStates;
     }
 
+    std::vector<std::vector<State>> &Turn::getPlayerStates() {
+        return this->playerStates;
+    }
+
     const std::vector<State> &Turn::getPlayerState(unsigned long long playerIdx) const {
+        return this->playerStates.at(playerIdx);
+    }
+
+    std::vector<State> &Turn::getPlayerState(unsigned long long playerIdx) {
         return this->playerStates.at(playerIdx);
     }
 
@@ -69,5 +82,9 @@ namespace Shared {
 
     unsigned long long Turn::numberOfPods(unsigned long long playerIdx) const {
         return this->playerStates.at(playerIdx).size();
+    }
+
+    void Turn::nextTurn() {
+        this->turnIdx++;
     }
 }

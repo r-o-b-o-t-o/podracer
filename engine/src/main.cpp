@@ -3,10 +3,22 @@
 
 #include "Messaging.h"
 #include "Settings.h"
+#include "Turn.h"
+
+enum GameStep {
+    waiting,
+    starting,
+    playing,
+};
 
 int main(int argc, char** argv) {
     Shared::Messaging m;
+
     bool run = true;
+    int numberOfPlayers;
+    GameStep gameStep = GameStep::waiting;
+
+    Shared::Turn gameState;
 
     Shared::Settings settings;
     settings.setPodsPerPlayer(argc > 1 ? std::stoi(argv[1]) : 1);
@@ -34,16 +46,59 @@ int main(int argc, char** argv) {
         settings.addCheckpoint(checkpoint);
     }
 
-    m.setOnMessageEvent("shutdown", [&run](Shared::Messaging &m, const Shared::Messaging::Values &values) {
+    m.setOnMessageEvent("players", [&](Shared::Messaging &m, const Shared::Messaging::Values &values, const std::smatch &match) {
+        numberOfPlayers = std::stoi(values[0][0]);
+        m.output(settings.toMessage());
+        gameStep = GameStep::playing;
+
+        std::vector<std::vector<Shared::State>> &players = gameState.getPlayerStates();
+        players.clear();
+        for (int playerIdx = 0; playerIdx < numberOfPlayers; ++playerIdx) {
+            std::vector<Shared::State> pods;
+
+            for (int podIdx = 0; podIdx < settings.getPodsPerPlayer(); ++podIdx) {
+                Shared::State state {};
+                state.direction = -45.0f;
+                state.health = 100.0f;
+                state.x = static_cast<int>(30.0f);
+                state.y = static_cast<int>(30.0f + (playerIdx + podIdx) * 20.0f);
+                pods.push_back(state);
+            }
+
+            players.push_back(pods);
+        }
+    });
+
+    m.setOnMessageEvent("shutdown", [&run](Shared::Messaging &m, const Shared::Messaging::Values &values, const std::smatch &match) {
         run = false;
         m.stop();
     });
 
     m.start();
-    m.output(settings.toMessage());
+
+    using clock = std::chrono::high_resolution_clock;
+    auto startTime = clock::now();
+    typedef std::chrono::duration<double, std::ratio<1, 60>> ticks;
 
     while (run) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        auto now = clock::now();
+        auto deltaTime = now - startTime;
+        startTime = now;
+
+        if (gameStep == GameStep::waiting) {
+            std::this_thread::sleep_for(ticks(1));
+            continue;
+        }
+
+        for (int playerIdx = 0; playerIdx < numberOfPlayers; ++playerIdx) {
+            for (auto &pod : gameState.getPlayerState(static_cast<unsigned long long int>(playerIdx))) {
+                pod.x += 0.05f;
+            }
+            m.output(gameState.toMessage(playerIdx + 1));
+        }
+        gameState.nextTurn();
+
+        std::this_thread::sleep_for(ticks(1));
     }
 
     return 0;

@@ -3,6 +3,7 @@ from queue import Queue
 from threading import Thread
 import subprocess
 import time
+import sys
 from sys import stderr,argv
 from inspect import currentframe, getframeinfo
 debug = False
@@ -98,7 +99,8 @@ class Program(object):
                 return item[1]
             elif error_intolerant:
                 print(self.name," : expected label '%s' instead of '%s'"%(label, item[0]), file=stderr)
-                self.stop()
+                #sys.exit(1)
+                #self.stop()
                 break
         return None
 

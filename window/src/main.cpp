@@ -43,7 +43,7 @@ int main() {
         }
     };
 
-    messaging.setOnMessageEvent("settings", [&](Shared::Messaging &m, const Shared::Messaging::Values &values) {
+    messaging.setOnMessageEvent("settings", [&](Shared::Messaging &m, const Shared::Messaging::Values &values, const std::smatch &match) {
         settings = Shared::Settings::parse(values);
         window.setSize(sf::Vector2u(static_cast<unsigned int>(settings.getWidth()),
                                     static_cast<unsigned int>(settings.getHeight())));
@@ -53,14 +53,15 @@ int main() {
             start();
         }
     });
-    messaging.setOnMessageEvent("players", [&](Shared::Messaging &m, const Shared::Messaging::Values &values) {
+    messaging.setOnMessageEvent("players", [&](Shared::Messaging &m, const Shared::Messaging::Values &values, const std::smatch &match) {
         numberOfPlayers = std::stoi(values[0][0]);
         if (loadedSettings) {
             start();
         }
     });
-    messaging.setOnMessageEvent("turn", [&](Shared::Messaging &m, const Shared::Messaging::Values &values) {
+    messaging.setOnMessageEvent("turn \\d \\d", [&](Shared::Messaging &m, const Shared::Messaging::Values &values, const std::smatch &match) {
         Shared::Turn turn = Shared::Turn::parse(values);
+        int turnIdx = std::stoi(match.str(1));
 
         int playerIdx = 0;
         for (auto &playerState : turn.getPlayerStates()) {

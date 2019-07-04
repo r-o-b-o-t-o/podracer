@@ -6,6 +6,7 @@
 #include <thread>
 #include <atomic>
 #include <vector>
+#include <regex>
 
 #include "Message.h"
 
@@ -13,7 +14,7 @@ namespace Shared {
     class Messaging {
     public:
         typedef std::vector<std::vector<std::string>> Values;
-        typedef std::function<void(Messaging &m, const Values &values)> CallbackFunction;
+        typedef std::function<void(Messaging &m, const Values &values, const std::smatch &match)> CallbackFunction;
 
         Messaging();
         ~Messaging();
