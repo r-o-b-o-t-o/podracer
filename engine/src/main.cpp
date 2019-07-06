@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
                 state.direction = 90.0f;
                 state.health = 100.0f;
                 state.x = static_cast<int>(30.0f);
-                state.y = static_cast<int>(30.0f + (playerIdx + podIdx) * 60.0f);
+                state.y = static_cast<int>(30.0f + (settings.getPodsPerPlayer() * playerIdx + podIdx) * 60.0f);
                 pods.push_back(state);
             }
 
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 
         for (int playerIdx = 0; playerIdx < numberOfPlayers; ++playerIdx) {
             for (auto &pod : gameState.getPlayerState(static_cast<unsigned long long int>(playerIdx))) {
-                pod.x += 10.0f;
+                pod.x += 3.0f;
             }
             messaging.write(gameState.toMessage(playerIdx + 1));
             messaging.read("actions " + std::to_string(gameState.getTurn()) + " " + std::to_string(playerIdx + 1), [&](const Shared::Messaging::Values &values, const std::smatch &match) {

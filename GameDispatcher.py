@@ -8,8 +8,7 @@ import subprocess
 from inspect import currentframe, getframeinfo
 debug = False
 display = False
-timeout = 100
-
+timeout = 1
 
 
 class Program(object):
@@ -71,8 +70,8 @@ class Program(object):
 
         self.thread = Thread(target=target)
         self.thread.start()
-        if debug: print("'%s' started"%self.name)
-        time.sleep(timeout/1000)
+        if debug:
+            print("'%s' started"%self.name)
 
     def stop(self):
         try:
@@ -85,6 +84,8 @@ class Program(object):
         if debug: print("'%s' stoped"%self.name)
 
     def is_running(self):
+        while not hasattr(self, "process"):
+            time.sleep(0.01)
         return self.process != None
 
 
@@ -158,7 +159,7 @@ class GameEngineProgram(Program):
 
         instructions = self.read("settings", True)
         while instructions == None and self.is_running():
-            time.sleep(timeout/100)
+            time.sleep(timeout / 100)
             instructions = self.read("settings", True)
 
         print("=" * 80)
