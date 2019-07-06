@@ -1,14 +1,26 @@
 #ifndef CHECKPOINT_H
 #define CHECKPOINT_H
 
-#include "TextureLoader.h"
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+
+#include "FontLoader.h"
 
 namespace Window {
     class Checkpoint {
     public:
-        explicit Checkpoint(const TextureLoader &textureLoader, int x, int y, int radius);
+        explicit Checkpoint(const FontLoader &fontLoader, int idx, int x, int y, int radius);
 
-        const sf::Sprite &getSprite() const;
+        void draw(sf::RenderWindow &window) const;
+
+        void collisionEnter();
+        void collisionExit();
+
+        int getX() const;
+        int getY() const;
+        int getRadius() const;
+        sf::FloatRect getBounds() const;
 
     private:
         int x;
@@ -16,7 +28,12 @@ namespace Window {
         int radius;
         int currentCollisions;
 
-        sf::Sprite sprites[2];
+        sf::Text text;
+        sf::CircleShape shape;
+        static sf::Color enabledColor;
+        static sf::Color disabledColor;
+
+        void applyCollisionEffect();
     };
 }
 

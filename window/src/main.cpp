@@ -6,6 +6,7 @@
 #include "Wall.h"
 #include "Settings.h"
 #include "Checkpoint.h"
+#include "FontLoader.h"
 #include "TextureLoader.h"
 
 using namespace Window;
@@ -13,6 +14,7 @@ using namespace Window;
 int main() {
     Shared::Messaging messaging;
     TextureLoader textureLoader;
+    FontLoader fontLoader;
 
     sf::RenderWindow window(sf::VideoMode(800, 600), L"Ｐ Ｏ Ｄ 　Ｒ Ａ Ｃ Ｅ Ｒ");
     window.setVerticalSyncEnabled(true);
@@ -33,17 +35,22 @@ int main() {
     messaging.read("players", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
         numberOfPlayers = std::stoi(values[0][0]);
         int numberOfPods = numberOfPlayers * settings.getPodsPerPlayer();
-        pods.clear();
 
+        pods.clear();
         for (int i = 0; i < numberOfPods; ++i) {
             pods.emplace_back(textureLoader);
         }
 
+        walls.clear();
         for (const Shared::Wall &wall : settings.getWalls()) {
             walls.emplace_back(textureLoader, wall.centerX, wall.centerY, wall.radius);
         }
+
+        int i = 0;
+        checkpoints.clear();
         for (const Shared::Checkpoint &checkpoint : settings.getCheckpoints()) {
-            checkpoints.emplace_back(textureLoader, checkpoint.centerX, checkpoint.centerY, checkpoint.radius);
+            checkpoints.emplace_back(fontLoader, i, checkpoint.centerX, checkpoint.centerY, checkpoint.radius);
+            ++i;
         }
     });
 
@@ -63,14 +70,14 @@ int main() {
 
         window.clear(clearColor);
 
+        for (const Checkpoint &checkpoint : checkpoints) {
+            checkpoint.draw(window);
+        }
         for (const Pod &pod : pods) {
             window.draw(pod.getSprite());
         }
         for (const Wall &wall : walls) {
             window.draw(wall.getSprite());
-        }
-        for (const Checkpoint &checkpoint : checkpoints) {
-            window.draw(checkpoint.getSprite());
         }
 
         window.display();
@@ -86,6 +93,7 @@ int main() {
                     pod.setHealth(podState.health);
                     pod.setPosition(static_cast<int>(podState.x), static_cast<int>(podState.y));
                     pod.setRotation(podState.direction);
+                    pod.collisions(checkpoints);
 
                     ++podIdx;
                 }

@@ -16,6 +16,7 @@ set(
 
     src/main.cpp
     src/TextureLoader.cpp
+    src/FontLoader.cpp
     src/Pod.cpp
     src/Wall.cpp
     src/Checkpoint.cpp

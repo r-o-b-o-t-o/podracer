@@ -1,5 +1,5 @@
-#ifndef TEXTURELOADER_H
-#define TEXTURELOADER_H
+#ifndef TEXTURE_LOADER_H
+#define TEXTURE_LOADER_H
 
 #include <SFML/Graphics.hpp>
 

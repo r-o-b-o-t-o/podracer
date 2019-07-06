@@ -5,32 +5,18 @@
 namespace Window {
     TextureLoader::TextureLoader() {
         std::vector<std::string> texturePaths = {
-                "car_1/1.png",
-                "car_1/2.png",
-                "car_1/3.png",
-                "car_1/4.png",
-                "car_1/5.png",
-
-                "car_2/1.png",
-                "car_2/2.png",
-                "car_2/3.png",
-                "car_2/4.png",
-                "car_2/5.png",
-
-                "car_3/1.png",
-                "car_3/2.png",
-                "car_3/3.png",
-                "car_3/4.png",
-                "car_3/5.png",
-
-                "walls/tire.png",
-                "walls/rock.png",
-                "walls/tree.png",
-                "walls/bush.png",
-
-                "checkpoint/off.png",
-                "checkpoint/on.png",
         };
+
+        for (int i = 1; i <= 3; ++i) {
+            texturePaths.push_back("walls/brown" + std::to_string(i) + ".png");
+            texturePaths.push_back("walls/grey" + std::to_string(i) + ".png");
+        }
+
+        for (int i = 1; i <= 12; ++i) {
+            for (int j = 1; j <= 4; ++j) {
+                texturePaths.push_back("pod_" + std::to_string(i) + "/" + std::to_string(j) + ".png");
+            }
+        }
 
         for (const std::string &path : texturePaths) {
             std::string fileName = path.substr(0, path.find_last_of('.'));
