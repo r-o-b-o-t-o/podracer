@@ -3,6 +3,11 @@
 #include "Settings.h"
 
 namespace Shared {
+    Wall::Wall(float x, float y, float radius) :
+            Entity(x, y, radius) {
+
+    }
+
     Settings Settings::parse(const Messaging::Values &values) {
         Settings settings {};
         for (auto it = values.begin(); it < values.end(); ++it) {
@@ -20,11 +25,11 @@ namespace Shared {
                 for (int i = 0; i < n; ++i) {
                     ++it;
                     line = *it;
-                    walls.push_back(Wall {
-                            std::stoi(line[0]),
-                            std::stoi(line[1]),
-                            std::stoi(line[2])
-                    });
+                    walls.emplace_back(
+                        std::stoi(line[0]),
+                        std::stoi(line[1]),
+                        std::stoi(line[2])
+                    );
                 }
                 settings.walls = walls;
             } else if (line[0] == "CHECKPOINTS") {
@@ -34,11 +39,11 @@ namespace Shared {
                 for (int i = 0; i < n; ++i) {
                     ++it;
                     line = *it;
-                    checkpoints.push_back(Checkpoint {
-                            std::stoi(line[0]),
-                            std::stoi(line[1]),
-                            std::stoi(line[2])
-                    });
+                    checkpoints.emplace_back(
+                        std::stoi(line[0]),
+                        std::stoi(line[1]),
+                        std::stoi(line[2])
+                    );
                 }
                 settings.checkpoints = checkpoints;
             }
@@ -55,13 +60,15 @@ namespace Shared {
         m.addValue("DIMENSIONS " + std::to_string(this->width) + " " + std::to_string(this->height));
         m.addValue("WALLS " + std::to_string(this->walls.size()));
         for (const Wall &wall : this->walls) {
-            m.addValue(std::to_string(wall.centerX) + " " + std::to_string(wall.centerY) + " " +
-                       std::to_string(wall.radius));
+            m.addValue(std::to_string(static_cast<int>(wall.getX())) + " " +
+                       std::to_string(static_cast<int>(wall.getY())) + " " +
+                       std::to_string(static_cast<int>(wall.getRadius())));
         }
         m.addValue("CHECKPOINTS " + std::to_string(this->checkpoints.size()));
         for (const Checkpoint &checkpoint : this->checkpoints) {
-            m.addValue(std::to_string(checkpoint.centerX) + " " + std::to_string(checkpoint.centerY) + " " +
-                       std::to_string(checkpoint.radius));
+            m.addValue(std::to_string(static_cast<int>(checkpoint.getX())) + " " +
+                       std::to_string(static_cast<int>(checkpoint.getY())) + " " +
+                       std::to_string(static_cast<int>(checkpoint.getRadius())));
         }
 
         return m;
@@ -74,7 +81,7 @@ namespace Shared {
         stream << "    Walls: [" << std::endl;
         for (auto it = settings.walls.begin(); it != settings.walls.end(); ++it) {
             const Wall &wall = *it;
-            stream << "        Wall { x: " << wall.centerX << ", y: " << wall.centerY << ", radius: " << wall.radius
+            stream << "        Wall { x: " << wall.getX() << ", y: " << wall.getY() << ", radius: " << wall.getRadius()
                    << " }";
             if (it + 1 != settings.walls.end()) {
                 stream << ",";
@@ -85,8 +92,8 @@ namespace Shared {
         stream << "    Checkpoints: [" << std::endl;
         for (auto it = settings.checkpoints.begin(); it != settings.checkpoints.end(); ++it) {
             const Checkpoint &checkpoint = *it;
-            stream << "        Checkpoint { x: " << checkpoint.centerX << ", y: " << checkpoint.centerY << ", radius: "
-                   << checkpoint.radius << " }";
+            stream << "        Checkpoint { x: " << checkpoint.getX() << ", y: " << checkpoint.getY() << ", radius: "
+                   << checkpoint.getRadius() << " }";
             if (it + 1 != settings.checkpoints.end()) {
                 stream << ",";
             }
@@ -114,7 +121,15 @@ namespace Shared {
         return this->walls;
     }
 
+    std::vector<Wall> &Settings::getWalls() {
+        return this->walls;
+    }
+
     const std::vector<Checkpoint> &Settings::getCheckpoints() const {
+        return this->checkpoints;
+    }
+
+    std::vector<Checkpoint> &Settings::getCheckpoints() {
         return this->checkpoints;
     }
 

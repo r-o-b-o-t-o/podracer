@@ -3,13 +3,13 @@
 
 #include <ostream>
 
+#include "Entity.h"
 #include "Messaging.h"
 
 namespace Shared {
-    struct Wall {
-        int centerX;
-        int centerY;
-        int radius;
+    class Wall : public Physics::Entity {
+    public:
+        Wall(float x, float y, float radius);
     };
 
     typedef Wall Checkpoint;
@@ -24,7 +24,9 @@ namespace Shared {
         int getWidth() const;
         int getHeight() const;
         const std::vector<Wall> &getWalls() const;
+        std::vector<Wall> &getWalls();
         const std::vector<Checkpoint> &getCheckpoints() const;
+        std::vector<Checkpoint> &getCheckpoints();
 
         void setPodsPerPlayer(int podsPerPlayer);
         void setWidth(int width);

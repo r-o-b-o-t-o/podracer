@@ -62,8 +62,4 @@ namespace Window {
     int Checkpoint::getRadius() const {
         return this->radius;
     }
-
-    sf::FloatRect Checkpoint::getBounds() const {
-        return this->shape.getGlobalBounds();
-    }
 }

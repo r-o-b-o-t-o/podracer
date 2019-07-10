@@ -20,7 +20,6 @@ namespace Window {
         int getX() const;
         int getY() const;
         int getRadius() const;
-        sf::FloatRect getBounds() const;
 
     private:
         int x;

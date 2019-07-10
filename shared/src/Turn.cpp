@@ -1,4 +1,3 @@
-#include <sstream>
 #include <cmath>
 
 #include "Turn.h"
@@ -6,6 +5,7 @@
 namespace Shared {
     Turn::Turn() :
             turnIdx(1) {
+
     }
 
     Turn Turn::parse(const Messaging::Values &values) {
@@ -14,19 +14,19 @@ namespace Shared {
             auto line = *it;
 
             int playerIdx = std::stoi(line[0]) - 1;
-            State state {};
-
-            state.x = std::stoi(line[2]);
-            state.y = std::stoi(line[3]);
-            state.vx = std::stof(line[4]);
-            state.vy = std::stof(line[5]);
-            state.direction = std::stof(line[6]);
-            state.health = std::stof(line[7]);
+            float x = std::stoi(line[2]);
+            float y = std::stoi(line[3]);
+            float vx = std::stof(line[4]);
+            float vy = std::stof(line[5]);
+            float direction = std::stof(line[6]);
+            float health = std::stof(line[7]);
+            Pod pod(x, y, vx, vy, direction);
+            pod.setHealth(health);
 
             if (turn.playerStates.size() <= playerIdx) {
                 turn.playerStates.emplace_back();
             }
-            turn.playerStates[playerIdx].push_back(state);
+            turn.playerStates[playerIdx].push_back(pod);
         }
 
         return turn;
@@ -36,19 +36,19 @@ namespace Shared {
         Message m("turn " + std::to_string(this->turnIdx) + " " + std::to_string(player));
 
         for (int playerIdx = 0; playerIdx < this->playerStates.size(); ++playerIdx) {
-            const std::vector<State> &states = this->playerStates[playerIdx];
+            const std::vector<Pod> &states = this->playerStates[playerIdx];
             for (int podIdx = 0; podIdx < states.size(); ++podIdx) {
-                const State &state = states[podIdx];
+                const Pod &pod = states[podIdx];
                 std::stringstream stream;
 
                 stream << playerIdx + 1 << " ";
                 stream << podIdx + 1 << " ";
-                stream << static_cast<int>(std::round(state.x)) << " ";
-                stream << static_cast<int>(std::round(state.y)) << " ";
-                stream << state.vx << " ";
-                stream << state.vy << " ";
-                stream << state.direction << " ";
-                stream << state.health;
+                stream << static_cast<int>(std::round(pod.getX())) << " ";
+                stream << static_cast<int>(std::round(pod.getY())) << " ";
+                stream << pod.getVx() << " ";
+                stream << pod.getVy() << " ";
+                stream << pod.getDirection() << " ";
+                stream << pod.getHealth();
                 m.addValue(stream.str());
             }
         }
@@ -56,23 +56,27 @@ namespace Shared {
         return m;
     }
 
-    const std::vector<std::vector<State>> &Turn::getPlayerStates() const {
+    const std::vector<std::vector<Pod>> &Turn::getPlayerStates() const {
         return this->playerStates;
     }
 
-    std::vector<std::vector<State>> &Turn::getPlayerStates() {
+    std::vector<std::vector<Pod>> &Turn::getPlayerStates() {
         return this->playerStates;
     }
 
-    const std::vector<State> &Turn::getPlayerState(unsigned long long playerIdx) const {
+    const std::vector<Pod> &Turn::getPlayerState(unsigned long long playerIdx) const {
         return this->playerStates.at(playerIdx);
     }
 
-    std::vector<State> &Turn::getPlayerState(unsigned long long playerIdx) {
+    std::vector<Pod> &Turn::getPlayerState(unsigned long long playerIdx) {
         return this->playerStates.at(playerIdx);
     }
 
-    const State &Turn::getPodState(unsigned long long playerIdx, unsigned long long podIdx) const {
+    const Pod &Turn::getPodState(unsigned long long playerIdx, unsigned long long podIdx) const {
+        return this->playerStates.at(playerIdx).at(podIdx);
+    }
+
+    Pod &Turn::getPodState(unsigned long long playerIdx, unsigned long long podIdx) {
         return this->playerStates.at(playerIdx).at(podIdx);
     }
 

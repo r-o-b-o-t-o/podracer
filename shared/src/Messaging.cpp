@@ -4,7 +4,7 @@
 
 #include "Messaging.h"
 
-#define DEBUG_MESSAGING true
+#define DEBUG_MESSAGING false
 
 namespace Shared {
     Messaging::Messaging() {

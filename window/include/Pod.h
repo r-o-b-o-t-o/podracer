@@ -1,5 +1,5 @@
-#ifndef POD_H
-#define POD_H
+#ifndef WINDOW_POD_H
+#define WINDOW_POD_H
 
 #include "Checkpoint.h"
 #include "TextureLoader.h"
@@ -19,6 +19,8 @@ namespace Window {
         void collisions(std::vector<Checkpoint> &checkpoints);
 
     private:
+        int x;
+        int y;
         int model;
         float health;
         int currentSprite;

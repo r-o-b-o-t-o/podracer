@@ -2,6 +2,8 @@
 
 #include "Pod.h"
 #include "Random.h"
+#include "Physics.h"
+#include "shared/include/Pod.h"
 
 namespace Window {
     Pod::Pod(const TextureLoader &textureLoader) {
@@ -17,6 +19,7 @@ namespace Window {
         }
 
         this->setHealth(100.0f);
+        this->setRotation(0.0f);
     }
 
     const sf::Sprite &Pod::getSprite() const {
@@ -41,6 +44,8 @@ namespace Window {
     }
 
     void Pod::setPosition(int x, int y) {
+        this->x = x;
+        this->y = y;
         for (sf::Sprite &sprite : this->sprites) {
             sprite.setPosition(x, y);
         }
@@ -48,13 +53,11 @@ namespace Window {
 
     void Pod::setRotation(float angle) {
         for (sf::Sprite &sprite : this->sprites) {
-            sprite.setRotation(angle);
+            sprite.setRotation(angle + 90.0f);
         }
     }
 
     void Pod::collisions(std::vector<Checkpoint> &checkpoints) {
-        sf::FloatRect bounds = this->sprites[this->currentSprite].getGlobalBounds();
-
         for (Checkpoint &cp : checkpoints) {
             bool alreadyCollides = false;
             for (Checkpoint* ptr : this->collidingCheckpoints) {
@@ -64,7 +67,7 @@ namespace Window {
                 }
             }
 
-            if (bounds.intersects(cp.getBounds())) {
+            if (Shared::Physics::containsCenter(cp.getX(), cp.getY(), cp.getRadius(), this->x, this->y)) {
                 if (!alreadyCollides) {
                     this->collidingCheckpoints.push_back(&cp);
                     cp.collisionEnter();

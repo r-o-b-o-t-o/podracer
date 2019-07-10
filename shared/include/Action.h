@@ -8,13 +8,14 @@
 
 namespace Shared {
     struct PodAction {
+        int pod;
         float rotation;
         float throttle;
     };
 
     class Action {
     public:
-        Action(int pods = 0);
+        explicit Action(int pods = 0);
         static Action parse(const Messaging::Values &values);
         Message toMessage();
 
@@ -24,6 +25,10 @@ namespace Shared {
 
     private:
         std::vector<PodAction> actions;
+
+        static void ltrim(std::string &s);
+        static void rtrim(std::string &s);
+        static void trim(std::string &s);
     };
 }
 

@@ -12,6 +12,9 @@ set(
     src/Settings.cpp
     src/Action.cpp
     src/Random.cpp
+    src/Pod.cpp
+    src/Physics.cpp
+    src/Entity.cpp
 )
 
 

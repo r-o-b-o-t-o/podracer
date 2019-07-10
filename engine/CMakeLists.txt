@@ -7,6 +7,8 @@ set(
     sources_list
 
     src/main.cpp
+    src/Engine.cpp
+    src/Timer.cpp
 )
 
 

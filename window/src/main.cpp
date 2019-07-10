@@ -2,12 +2,10 @@
 #include <SFML/Graphics.hpp>
 
 #include "Pod.h"
-#include "Turn.h"
 #include "Wall.h"
+#include "Turn.h"
 #include "Settings.h"
-#include "Checkpoint.h"
-#include "FontLoader.h"
-#include "TextureLoader.h"
+#include "Messaging.h"
 
 using namespace Window;
 
@@ -43,13 +41,13 @@ int main() {
 
         walls.clear();
         for (const Shared::Wall &wall : settings.getWalls()) {
-            walls.emplace_back(textureLoader, wall.centerX, wall.centerY, wall.radius);
+            walls.emplace_back(textureLoader, wall.getX(), wall.getY(), wall.getRadius());
         }
 
         int i = 0;
         checkpoints.clear();
         for (const Shared::Checkpoint &checkpoint : settings.getCheckpoints()) {
-            checkpoints.emplace_back(fontLoader, i, checkpoint.centerX, checkpoint.centerY, checkpoint.radius);
+            checkpoints.emplace_back(fontLoader, i, checkpoint.getX(), checkpoint.getY(), checkpoint.getRadius());
             ++i;
         }
     });
@@ -88,11 +86,11 @@ int main() {
             int playerIdx = 0;
             for (auto &playerState : turn.getPlayerStates()) {
                 int podIdx = 0;
-                for (const Shared::State &podState : playerState) {
+                for (const Shared::Pod &podState : playerState) {
                     Pod &pod = pods[settings.getPodsPerPlayer() * playerIdx + podIdx];
-                    pod.setHealth(podState.health);
-                    pod.setPosition(static_cast<int>(podState.x), static_cast<int>(podState.y));
-                    pod.setRotation(podState.direction);
+                    pod.setHealth(podState.getHealth());
+                    pod.setPosition(static_cast<int>(podState.getX()), static_cast<int>(podState.getY()));
+                    pod.setRotation(podState.getDirection());
                     pod.collisions(checkpoints);
 
                     ++podIdx;

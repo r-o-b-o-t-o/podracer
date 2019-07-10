@@ -1,18 +1,10 @@
 #ifndef TURN_H
 #define TURN_H
 
+#include "shared/include/Pod.h"
 #include "Messaging.h"
 
 namespace Shared {
-    struct State {
-        float x;
-        float y;
-        float vx;
-        float vy;
-        float direction;
-        float health;
-    };
-
     class Turn {
     public:
         Turn();
@@ -21,17 +13,18 @@ namespace Shared {
 
         unsigned long long numberOfPlayers() const;
         unsigned long long numberOfPods(unsigned long long playerIdx) const;
-        const std::vector<std::vector<State>> &getPlayerStates() const;
-        std::vector<std::vector<State>> &getPlayerStates();
-        const std::vector<State> &getPlayerState(unsigned long long playerIdx) const;
-        std::vector<State> &getPlayerState(unsigned long long playerIdx);
-        const State &getPodState(unsigned long long playerIdx, unsigned long long podIdx) const;
+        const std::vector<std::vector<Pod>> &getPlayerStates() const;
+        std::vector<std::vector<Pod>> &getPlayerStates();
+        const std::vector<Pod> &getPlayerState(unsigned long long playerIdx) const;
+        std::vector<Pod> &getPlayerState(unsigned long long playerIdx);
+        const Pod &getPodState(unsigned long long playerIdx, unsigned long long podIdx) const;
+        Pod &getPodState(unsigned long long playerIdx, unsigned long long podIdx);
         unsigned long getTurn() const;
         void nextTurn();
 
     private:
         unsigned long turnIdx;
-        std::vector<std::vector<State>> playerStates;
+        std::vector<std::vector<Pod>> playerStates;
     };
 }
 
