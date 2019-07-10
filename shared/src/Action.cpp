@@ -8,31 +8,6 @@ namespace Shared {
     }
 
     Action Action::parse(const Messaging::Values &values) {
-        /*Action a {};
-
-        std::vector<std::string> line = values[0];
-        bool empty = values[0][0] == "NOACTION";
-        int podIdx = 0;
-        for (int i = 0; i < line.size(); i += 2) {
-            PodAction action {};
-            action.pod = podIdx;
-
-            if (empty) {
-                action.throttle = 0.0f;
-                action.rotation = 0.0f;
-            } else {
-                std::string rotation = line[i];
-                std::string throttle = line[i + 1];
-                if (throttle[throttle.length() - 1] == ';') {
-                    throttle = throttle.substr(0, throttle.length() - 1);
-                }
-                action.rotation = static_cast<float>(std::stod(rotation));
-                action.throttle = static_cast<float>(std::stod(throttle));
-            }
-            a.actions.push_back(action);
-            ++podIdx;
-        }*/
-
         Action a {};
         bool empty = values[0][0] == "NOACTION";
 
