@@ -1,9 +1,14 @@
 #include "Action.h"
 
 namespace Shared {
+    PodAction::PodAction(int pod) :
+            pod(pod) {
+
+    }
+
     Action::Action(int pods) {
         for (int i = 0; i < pods; ++i) {
-            this->actions.emplace_back();
+            this->actions.emplace_back(i);
         }
     }
 
@@ -37,8 +42,7 @@ namespace Shared {
             }
 
             for (auto &s : actions) {
-                PodAction podAction {};
-                podAction.pod = podIdx;
+                PodAction podAction(podIdx);
                 podAction.rotation = std::stof(s.substr(0, s.find(' ')));
                 podAction.throttle = std::stof(s.substr(s.find(' ') + 1));
                 a.actions.push_back(podAction);
@@ -74,6 +78,10 @@ namespace Shared {
     }
 
     const std::vector<PodAction> &Action::getActions() const {
+        return this->actions;
+    }
+
+    std::vector<PodAction> &Action::getActions() {
         return this->actions;
     }
 

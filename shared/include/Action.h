@@ -8,9 +8,12 @@
 
 namespace Shared {
     struct PodAction {
+    public:
         int pod;
         float rotation;
         float throttle;
+
+        explicit PodAction(int pod);
     };
 
     class Action {
@@ -22,6 +25,7 @@ namespace Shared {
         const PodAction &getPodAction(unsigned long long podIdx) const;
         PodAction &getPodAction(unsigned long long podIdx);
         const std::vector<PodAction> &getActions() const;
+        std::vector<PodAction> &getActions();
 
     private:
         std::vector<PodAction> actions;
