@@ -21,6 +21,9 @@ int main() {
         });
 
         Shared::Action action(settings.getPodsPerPlayer());
+        for (auto &a : action.getActions()) {
+            a.throttle = 1.0f;
+        }
         messaging.write(action.toMessage());
     }
 

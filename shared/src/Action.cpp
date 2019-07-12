@@ -2,7 +2,9 @@
 
 namespace Shared {
     PodAction::PodAction(int pod) :
-            pod(pod) {
+            pod(pod),
+            rotation(0.0f),
+            throttle(0.0f) {
 
     }
 
