@@ -107,7 +107,9 @@ int main() {
             int playerIdx = 0;
             for (auto &playerState : turn.getPlayerStates()) {
                 int podIdx = 0;
-                for (const Shared::Pod &podState : playerState) {
+                for (Shared::Pod &podState : playerState) {
+                    podState.checkWin(settings.getCheckpoints());
+
                     Pod &pod = pods[settings.getPodsPerPlayer() * playerIdx + podIdx];
                     pod.setHealth(podState.getHealth());
                     pod.setPosition(static_cast<int>(podState.getX()), static_cast<int>(podState.getY()));
