@@ -1,7 +1,9 @@
 #include "PodTooltip.h"
 
 namespace Window {
-    PodTooltip::PodTooltip(const Window::TextureLoader &textureLoader, const Window::FontLoader &fontLoader, int playerIdx, int podIdx) {
+    PodTooltip::PodTooltip(const Window::TextureLoader &textureLoader, const Window::FontLoader &fontLoader, int playerIdx, int podIdx) :
+            enabled(false) {
+
         this->frame = sf::RectangleShape(sf::Vector2f(210.0f, 64.0f));
         this->frame.setFillColor(sf::Color(0, 0, 0, 70));
 
