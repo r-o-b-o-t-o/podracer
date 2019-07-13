@@ -6,7 +6,10 @@
 
 class Engine {
 public:
-    explicit Engine(int numberOfPlayers);
+    explicit Engine(int podsPerPlayer, const std::string &importExport = "");
+
+    void importLevel(const std::string &file);
+    void exportLevel(const std::string &file);
 
 private:
     void init();
@@ -15,6 +18,8 @@ private:
     int update();
     void writeTurn();
     void readActions();
+
+    void handleImportExport(std::string file);
 
     Shared::Settings settings;
     Shared::Messaging messaging;

@@ -1,17 +1,23 @@
+#include <fstream>
+
 #include "Engine.h"
 #include "Timer.h"
 #include "Action.h"
 
-#include <iostream>
+#include "json.hpp"
 
-Engine::Engine(int numberOfPlayers) :
-        numberOfPlayers(numberOfPlayers) {
+Engine::Engine(int podsPerPlayer, const std::string &importExport) :
+        numberOfPlayers(podsPerPlayer) {
 
-    this->settings.setPodsPerPlayer(numberOfPlayers);
+    this->settings.setPodsPerPlayer(podsPerPlayer);
     this->settings.setWidth(800);
     this->settings.setHeight(600);
 
-    this->init();
+    if (importExport.empty()) {
+        this->init();
+    } else {
+        this->handleImportExport(importExport);
+    }
     this->readPlayers();
     this->messaging.write(this->settings.toMessage());
     this->run();
@@ -69,10 +75,10 @@ void Engine::run() {
 
 void decreaseHpOnCollision(Shared::Physics::Entity* entity){
     Shared::Pod* pod = static_cast<Shared::Pod*>(entity);
-    if (pod == nullptr)
+    if (pod == nullptr) {
         return;
-    pod->setHealth(pod->getHealth()-5);
-
+    }
+    pod->setHealth(pod->getHealth() - 5);
 }
 
 int Engine::update() {
@@ -93,7 +99,7 @@ int Engine::update() {
 
                 for (auto &pods2 : this->gameState.getPlayerStates()) {
                     for (auto &o : pods2) {
-                        if (&o == &p || o.getHealth() <= 0) {
+                        if (&o == &p || o.getHealth() <= 0 || p.getHealth() <= 0) {
                             continue;
                         }
                         t = p.collisionTime(o);
@@ -170,5 +176,64 @@ void Engine::readActions() {
                 pod.thrust(power);
             }
         });
+    }
+}
+
+void Engine::importLevel(const std::string &file) {
+    using namespace nlohmann;
+
+    std::ifstream f(file);
+    json j;
+    f >> j;
+
+    auto &checkpoints = this->settings.getCheckpoints();
+    checkpoints.clear();
+    for (const auto &cp : j["checkpoints"]) {
+        checkpoints.emplace_back(cp["x"], cp["y"], cp["radius"]);
+    }
+
+    auto &walls = this->settings.getWalls();
+    walls.clear();
+    for (const auto &wall : j["walls"]) {
+        walls.emplace_back(wall["x"], wall["y"], wall["radius"]);
+    }
+}
+
+void Engine::exportLevel(const std::string &file) {
+    using namespace nlohmann;
+
+    json j = {
+        { "checkpoints", json::array() },
+        { "walls", json::array() },
+    };
+
+    for (const auto &cp : this->settings.getCheckpoints()) {
+        j["checkpoints"].push_back({
+            { "x", cp.getX() },
+            { "y", cp.getY() },
+            { "radius", cp.getRadius() },
+        });
+    }
+    for (const auto &wall : this->settings.getWalls()) {
+        j["walls"].push_back({
+            { "x", wall.getX() },
+            { "y", wall.getY() },
+            { "radius", wall.getRadius() },
+        });
+    }
+
+    std::ofstream f(file);
+    f << j << std::endl;
+}
+
+void Engine::handleImportExport(std::string file) {
+    char action = file[0];
+    file.erase(0, 1);
+
+    if (action == '<') {
+        this->importLevel(file);
+    } else if (action == '>') {
+        this->init();
+        this->exportLevel(file);
     }
 }

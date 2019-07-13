@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 include_directories(.)
+include_directories(./lib)
 
 add_subdirectory(engine)
 add_subdirectory(ai)
