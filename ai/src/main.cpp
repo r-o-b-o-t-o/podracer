@@ -89,8 +89,6 @@ int main(int argc, char** argv) {
         Shared::Action action(settings.getPodsPerPlayer());
         for (auto &a : action.getActions()) {
             Shared::Pod &pod = turn.getPodState(playerId-1, a.pod);
-            if (pod.getHealth() <= 0)
-                continue;
             pod.checkWin(checkpoints);
             a.throttle = getThrustTowardCheckpoint(pod, checkpoints[pod.getNextCheckpoint()]);
             a.rotation = getRotationTowardCheckpoint(pod, checkpoints[pod.getNextCheckpoint()]);

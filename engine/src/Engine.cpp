@@ -118,6 +118,8 @@ int Engine::update() {
 
         for (auto &pods : this->gameState.getPlayerStates()) {
             for (auto &p : pods) {
+                if (p.getHealth() <= 0)
+                    continue;
                 p.updatePosition(mt - 0.001f);
                 p.friction(mt);
                 p.checkWin(this->settings.getCheckpoints());
