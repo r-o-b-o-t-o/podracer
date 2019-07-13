@@ -72,7 +72,7 @@ void decreaseHpOnCollision(Shared::Physics::Entity* entity){
     Shared::Pod* pod = static_cast<Shared::Pod*>(entity);
     if (pod == nullptr)
         return;
-    pod->setHealth(pod->getHealth()-10);
+    pod->setHealth(pod->getHealth()-5);
 
 }
 
