@@ -57,9 +57,9 @@ void parseArgs(int argc, char** argv) {
     if (argc > 2)
         EXPO = std::stof(argv[2]);
     if (argc > 3)
-        MAX_SPEED = std::stof(argv[3]);
+        MIN_SPEED = std::stof(argv[3]);
     if (argc > 4)
-        MIN_SPEED = std::stof(argv[4]);
+        MAX_SPEED = std::stof(argv[4]);
 }
 
 int main(int argc, char** argv) {
