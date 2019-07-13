@@ -53,6 +53,11 @@ int main() {
     });
 
     Shared::Turn turn;
+    int winner = -1;
+    sf::Text winnerText("", *fontLoader.get("kenvector_future_thin"), 64);
+    winnerText.setOutlineThickness(4.0f);
+    winnerText.setOutlineColor(sf::Color(30, 30, 30));
+
     while (window.isOpen()) {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
@@ -98,6 +103,9 @@ int main() {
         for (const Pod &pod : pods) {
             pod.drawUi(window);
         }
+        if (winner != -1) {
+            window.draw(winnerText);
+        }
 
         window.display();
 
@@ -108,7 +116,12 @@ int main() {
             for (auto &playerState : turn.getPlayerStates()) {
                 int podIdx = 0;
                 for (Shared::Pod &podState : playerState) {
-                    podState.checkWin(settings.getCheckpoints());
+                    if (winner == -1 && podState.checkWin(settings.getCheckpoints())) {
+                        winner = playerIdx;
+                        winnerText.setString("PLAYER " + std::to_string(playerIdx + 1) + " WON!");
+                        sf::FloatRect bounds = winnerText.getGlobalBounds();
+                        winnerText.setPosition((window.getSize().x - bounds.width) / 2, 0.3f * window.getSize().y);
+                    }
 
                     Pod &pod = pods[settings.getPodsPerPlayer() * playerIdx + podIdx];
                     pod.setHealth(podState.getHealth());

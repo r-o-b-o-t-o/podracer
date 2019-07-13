@@ -50,21 +50,20 @@ void Engine::readPlayers() {
 void Engine::run() {
     Timer timer;
     float dt;
+    int winner = -1;
+    this->damageEnabled = true;
 
     while (true) {
         dt = timer.elapsed();
         timer.reset();
 
-        int winner = this->update();
+        if (winner == -1) {
+            winner = this->update();
+        }
         this->writeTurn();
         this->readActions();
 
         gameState.nextTurn();
-
-        if (winner != -1) {
-            std::cerr << "PLAYER #" << winner << " WON!" << std::endl;
-            break;
-        }
     }
 }
 
@@ -84,7 +83,7 @@ int Engine::update() {
     Shared::Physics::Entity* podEntity;
     Shared::Physics::Entity* otherEntity;
 
-    while (time +0.01f < TIME) {
+    while (time + 0.01f < TIME) {
         mt = TIME - time;
         podEntity = otherEntity = nullptr;
 
@@ -129,8 +128,10 @@ int Engine::update() {
         time += mt;
 
         if (podEntity != nullptr && otherEntity != nullptr) {
-            decreaseHpOnCollision(podEntity);
-            decreaseHpOnCollision(otherEntity);
+            if (this->damageEnabled) {
+                decreaseHpOnCollision(podEntity);
+                decreaseHpOnCollision(otherEntity);
+            }
             podEntity->impactRedirection(*otherEntity);
         }
     }
@@ -160,7 +161,7 @@ void Engine::readActions() {
 
             for (const auto &action : parsedActions.getActions()) {
                 Shared::Pod &pod = this->gameState.getPodState(static_cast<unsigned long long>(playerIdx),
-                                                                 static_cast<unsigned long long>(action.pod));
+                                                               static_cast<unsigned long long>(action.pod));
 
                 float rot = std::max(-Shared::Pod::MAX_TURN, std::min(action.rotation, Shared::Pod::MAX_TURN));
                 pod.turn(rot);

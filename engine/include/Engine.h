@@ -20,6 +20,7 @@ private:
     Shared::Messaging messaging;
     Shared::Turn gameState;
     int numberOfPlayers;
+    bool damageEnabled;
 };
 
 #endif
