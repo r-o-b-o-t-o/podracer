@@ -94,7 +94,7 @@ int Engine::update() {
 
                 for (auto &pods2 : this->gameState.getPlayerStates()) {
                     for (auto &o : pods2) {
-                        if (&o == &p) {
+                        if (&o == &p || o.getHealth() <= 0) {
                             continue;
                         }
                         t = p.collisionTime(o);
