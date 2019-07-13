@@ -68,6 +68,14 @@ void Engine::run() {
     }
 }
 
+void decreaseHpOnCollision(Shared::Physics::Entity* entity){
+    Shared::Pod* pod = static_cast<Shared::Pod*>(entity);
+    if (pod == nullptr)
+        return;
+    pod->setHealth(pod->getHealth()-10);
+
+}
+
 int Engine::update() {
     const float TIME = 1.0f;
 
@@ -119,6 +127,8 @@ int Engine::update() {
         time += mt;
 
         if (podEntity != nullptr && otherEntity != nullptr) {
+            decreaseHpOnCollision(podEntity);
+            decreaseHpOnCollision(otherEntity);
             podEntity->impactRedirection(*otherEntity);
         }
     }
