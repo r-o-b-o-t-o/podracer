@@ -6,8 +6,12 @@
 #include "shared/include/Pod.h"
 
 namespace Window {
-    Pod::Pod(const TextureLoader &textureLoader) {
-        this->model = Shared::Random::getInt(1, 12);
+    Pod::Pod(const TextureLoader &textureLoader, const FontLoader &fontLoader, int playerIdx, int podIdx) :
+            tooltip(textureLoader, fontLoader, playerIdx, podIdx),
+            playerIdx(playerIdx),
+            podIdx(podIdx) {
+
+        this->model = Pod::getModelId(playerIdx, podIdx);
         for (int i = 1; i <= 4; ++i) {
             const sf::Texture* texture = textureLoader.get("pod_" + std::to_string(this->model) + "/" + std::to_string(i));
             sf::Sprite sprite(*texture);
@@ -26,10 +30,6 @@ namespace Window {
         return this->sprites[this->currentSprite];
     }
 
-    float Pod::getHealth() const {
-        return this->health;
-    }
-
     void Pod::setHealth(float health) {
         if (health < 0.0f) {
             health = 0.0f;
@@ -41,6 +41,7 @@ namespace Window {
 
         int modelsCount = 4;
         this->currentSprite = std::min(static_cast<int>((100.0f - health) / (100.0f / modelsCount)), modelsCount - 1);
+        this->tooltip.setHealth(health);
     }
 
     void Pod::setPosition(int x, int y) {
@@ -79,5 +80,30 @@ namespace Window {
                 }
             }
         }
+    }
+
+    void Pod::setNextCheckpoint(int nextCheckpoint) {
+        this->tooltip.setNextCheckpoint(nextCheckpoint);
+    }
+
+    int Pod::getModelId(int playerIdx, int podIdx) {
+        int id = playerIdx % 4; // 4 different colors
+        id *= 3; // 3 skins per color
+        id += podIdx % 3;
+        id++; // 1-based indexing
+        return id;
+    }
+
+    void Pod::update(const sf::Event &e) {
+        this->tooltip.update(e);
+        this->tooltip.setVisible(Shared::Physics::containsCenter(this->x, this->y, Shared::Pod::RADIUS, e.mouseMove.x, e.mouseMove.y));
+    }
+
+    void Pod::draw(sf::RenderWindow &window) const {
+        window.draw(this->getSprite());
+    }
+
+    void Pod::drawUi(sf::RenderWindow &window) const {
+        this->tooltip.draw(window);
     }
 }

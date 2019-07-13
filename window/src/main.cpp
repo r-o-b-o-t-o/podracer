@@ -1,5 +1,4 @@
 #include <vector>
-#include <SFML/Graphics.hpp>
 
 #include "Pod.h"
 #include "Wall.h"
@@ -20,23 +19,23 @@ int main() {
     sf::Color clearColor(40, 40, 40);
 
     Shared::Settings settings;
-    int numberOfPlayers = -1;
     std::vector<Pod> pods;
     std::vector<Wall> walls;
     std::vector<Checkpoint> checkpoints;
 
-    messaging.read("settings", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
+    messaging.read("settings", [&](const Shared::Messaging::Values &values) {
         settings = Shared::Settings::parse(values);
         window.setSize(sf::Vector2u(static_cast<unsigned int>(settings.getWidth()),
                                     static_cast<unsigned int>(settings.getHeight())));
     });
-    messaging.read("players", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
-        numberOfPlayers = std::stoi(values[0][0]);
-        int numberOfPods = numberOfPlayers * settings.getPodsPerPlayer();
+    messaging.read("players", [&](const Shared::Messaging::Values &values) {
+        int numberOfPlayers = std::stoi(values[0][0]);
 
         pods.clear();
-        for (int i = 0; i < numberOfPods; ++i) {
-            pods.emplace_back(textureLoader);
+        for (int i = 0; i < numberOfPlayers; ++i) {
+            for (int j = 0; j < settings.getPodsPerPlayer(); ++j) {
+                pods.emplace_back(textureLoader, fontLoader, i, j);
+            }
         }
 
         walls.clear();
@@ -63,6 +62,10 @@ int main() {
                     window.close();
                     break;
                 }
+            } else if (event.type == sf::Event::MouseMoved) {
+                for (Pod &pod : pods) {
+                    pod.update(event);
+                }
             }
         }
 
@@ -72,15 +75,18 @@ int main() {
             checkpoint.draw(window);
         }
         for (const Pod &pod : pods) {
-            window.draw(pod.getSprite());
+            pod.draw(window);
         }
         for (const Wall &wall : walls) {
             window.draw(wall.getSprite());
         }
+        for (const Pod &pod : pods) {
+            pod.drawUi(window);
+        }
 
         window.display();
 
-        messaging.read("turn", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
+        messaging.read("turn", [&](const Shared::Messaging::Values &values) {
             Shared::Turn turn = Shared::Turn::parse(values);
 
             int playerIdx = 0;
@@ -92,6 +98,8 @@ int main() {
                     pod.setPosition(static_cast<int>(podState.getX()), static_cast<int>(podState.getY()));
                     pod.setRotation(podState.getDirection());
                     pod.collisions(checkpoints);
+                    pod.setNextCheckpoint(podState.getNextCheckpoint());
+                    pod.setHealth(podState.getHealth());
 
                     ++podIdx;
                 }

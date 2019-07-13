@@ -1,7 +1,7 @@
 #include <cmath>
+#include <sstream>
 
 #include "Turn.h"
-#include <sstream>
 
 namespace Shared {
     Turn::Turn() :

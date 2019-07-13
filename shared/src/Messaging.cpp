@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <iterator>
 
 #include "Messaging.h"
 
@@ -41,7 +42,6 @@ namespace Shared {
     void Messaging::read(const std::string &label, const CallbackFunction &fn) {
         std::string line;
         bool started = false;
-        std::smatch match;
         Values inputs;
 
         while (true) {
@@ -52,13 +52,12 @@ namespace Shared {
             }
 
             if (!started) {
-                std::regex re("START " + label);
-                if (std::regex_search(line, match, re)) {
+                if (line == "START " + label) {
                     started = true;
                 }
             } else {
                 if (line.rfind("STOP ") == 0) {
-                    fn(inputs, match);
+                    fn(inputs);
 
                     if (DEBUG_MESSAGING) {
                         std::ofstream f;

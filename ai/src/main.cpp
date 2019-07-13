@@ -19,10 +19,10 @@ int main() {
 
     int playerId;
     Shared::Settings settings;
-    messaging.read("player", [&playerId](const Shared::Messaging::Values &values, const std::smatch &match) {
+    messaging.read("player", [&playerId](const Shared::Messaging::Values &values) {
         playerId = std::stoi(values[0][0]);
     });
-    messaging.read("settings", [&settings](const Shared::Messaging::Values &values, const std::smatch &match) {
+    messaging.read("settings", [&settings](const Shared::Messaging::Values &values) {
         settings = Shared::Settings::parse(values);
     });
 
@@ -31,7 +31,7 @@ int main() {
 
     Shared::Turn turn = Shared::Turn();
     while (true) {
-        messaging.read("turn", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
+        messaging.read("turn", [&](const Shared::Messaging::Values &values) {
             turn.update(values);
         });
 

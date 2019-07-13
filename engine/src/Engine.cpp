@@ -28,7 +28,7 @@ void Engine::init() {
 }
 
 void Engine::readPlayers() {
-    this->messaging.read("players", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
+    this->messaging.read("players", [&](const Shared::Messaging::Values &values) {
         this->numberOfPlayers = std::stoi(values[0][0]);
 
         std::vector<std::vector<Shared::Pod>> &players = this->gameState.getPlayerStates();
@@ -143,7 +143,7 @@ void Engine::writeTurn() {
 
 void Engine::readActions() {
     for (int playerIdx = 0; playerIdx < this->numberOfPlayers; ++playerIdx) {
-        messaging.read("actions " + std::to_string(gameState.getTurn()) + " " + std::to_string(playerIdx + 1), [&](const Shared::Messaging::Values &values, const std::smatch &match) {
+        messaging.read("actions " + std::to_string(gameState.getTurn()) + " " + std::to_string(playerIdx + 1), [&](const Shared::Messaging::Values &values) {
             Shared::Action parsedActions = Shared::Action::parse(values);
 
             for (const auto &action : parsedActions.getActions()) {

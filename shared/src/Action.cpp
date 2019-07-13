@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "Action.h"
 
 namespace Shared {

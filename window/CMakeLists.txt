@@ -12,6 +12,7 @@ set(
     src/TextureLoader.cpp
     src/FontLoader.cpp
     src/Pod.cpp
+    src/PodTooltip.cpp
     src/Wall.cpp
     src/Checkpoint.cpp
 )

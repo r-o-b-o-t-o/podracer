@@ -3,7 +3,7 @@
 
 #include <map>
 #include <vector>
-#include <regex>
+#include <functional>
 
 #include "Message.h"
 
@@ -12,7 +12,7 @@ namespace Shared {
     public:
         Messaging();
         typedef std::vector<std::vector<std::string>> Values;
-        typedef std::function<void(const Values &values, const std::smatch &match)> CallbackFunction;
+        typedef std::function<void(const Values &values)> CallbackFunction;
 
         void read(const std::string &label, const CallbackFunction &fn);
         void write(const std::string &message, const std::vector<std::string> &values);
