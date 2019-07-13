@@ -63,7 +63,7 @@ int main() {
             if (event.type == sf::Event::Closed) {
                 window.close();
             } else if (event.type == sf::Event::Resized) {
-                window.setView(sf::View(sf::FloatRect(0, 0, event.size.width, event.size.height)));
+                window.setView(sf::View(window.getView().getCenter(), sf::Vector2f(event.size.width, event.size.height)));
             } else if (event.type == sf::Event::KeyReleased) {
                 if (event.key.code == sf::Keyboard::Key::Escape) {
                     window.close();
@@ -118,9 +118,11 @@ int main() {
                 for (Shared::Pod &podState : playerState) {
                     if (winner == -1 && podState.checkWin(settings.getCheckpoints())) {
                         winner = playerIdx;
-                        winnerText.setString("PLAYER " + std::to_string(playerIdx + 1) + " WON!");
-                        sf::FloatRect bounds = winnerText.getGlobalBounds();
-                        winnerText.setPosition((window.getSize().x - bounds.width) / 2, 0.3f * window.getSize().y);
+                        winnerText.setString("PLAYER " + std::to_string(winner + 1) + " WON!");
+                        sf::FloatRect bounds = winnerText.getLocalBounds();
+                        winnerText.setOrigin(bounds.width / 2.0f, bounds.height / 2.0f);
+                        const auto &center = window.getView().getCenter();
+                        winnerText.setPosition(center);
                     }
 
                     Pod &pod = pods[settings.getPodsPerPlayer() * playerIdx + podIdx];
