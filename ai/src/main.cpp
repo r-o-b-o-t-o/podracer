@@ -4,8 +4,6 @@
 #include "Pod.h"
 #include "Physics.h"
 
-#include <iostream>
-
 float getRotationTowardCheckpoint(Shared::Pod pod, Shared::Checkpoint checkpoint) {
 
     float x = checkpoint.getX() - pod.getX();
