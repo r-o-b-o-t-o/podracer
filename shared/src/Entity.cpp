@@ -31,6 +31,22 @@ namespace Shared {
             return this->vy;
         }
 
+        void Entity::setX(float x) {
+            this->x = x;
+        }
+
+        void Entity::setY(float y) {
+            this->y = y;
+        }
+
+        void Entity::setVx(float vx) {
+            this->vx = vx;
+        }
+
+        void Entity::setVy(float vy) {
+            this->vy = vy;
+        }
+
         float Entity::getRadius() const {
             return this->radius;
         }

@@ -11,6 +11,7 @@ namespace Shared {
         float radToDeg(float r);
         float vecSquareNorm(float x, float y);
         float vecNorm(float x, float y);
+        float rotationTo(float x, float y);
     };
 }
 

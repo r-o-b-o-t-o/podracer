@@ -31,5 +31,9 @@ namespace Shared {
         float vecNorm(float x, float y) {
             return std::sqrt(vecSquareNorm(x, y));
         }
+
+        float rotationTo(float x, float y){
+            return (360 + static_cast<int>(radToDeg(atan2(y,x)))) % 360;
+        }
     }
 }

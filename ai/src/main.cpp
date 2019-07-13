@@ -1,6 +1,18 @@
 #include "Turn.h"
 #include "Action.h"
 #include "Settings.h"
+#include "Pod.h"
+#include "Physics.h"
+
+#include <iostream>
+
+float getRotationTowardCheckpoint(Shared::Pod pod, Shared::Checkpoint checkpoint) {
+
+    float x = checkpoint.getX() - pod.getX();
+    float y = checkpoint.getY() - pod.getY();
+
+    return -(pod.getDirection() - Shared::Physics::rotationTo(x, y))/2;
+}
 
 int main() {
     Shared::Messaging messaging;
@@ -14,15 +26,21 @@ int main() {
         settings = Shared::Settings::parse(values);
     });
 
+    std::vector<Shared::Checkpoint> checkpoints = settings.getCheckpoints();
+
+
+    Shared::Turn turn = Shared::Turn();
     while (true) {
-        Shared::Turn turn;
         messaging.read("turn", [&](const Shared::Messaging::Values &values, const std::smatch &match) {
-            turn = Shared::Turn::parse(values);
+            turn.update(values);
         });
 
         Shared::Action action(settings.getPodsPerPlayer());
         for (auto &a : action.getActions()) {
-            a.throttle = 1.0f;
+            Shared::Pod &pod = turn.getPodState(playerId-1, a.pod);
+            pod.checkWin(checkpoints);
+            a.throttle = 0.80f;
+            a.rotation = getRotationTowardCheckpoint(pod, checkpoints[pod.getNextCheckpoint()]);
         }
         messaging.write(action.toMessage());
     }

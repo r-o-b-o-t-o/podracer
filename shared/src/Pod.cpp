@@ -21,8 +21,20 @@ namespace Shared {
         return this->direction;
     }
 
+    void Pod::setDirection(float direction) {
+        this->direction = direction;
+    }
+
     float Pod::getHealth() const {
         return this->health;
+    }
+
+    int Pod::getNextCheckpoint() const {
+        return this->nextCheckpoint;
+    }
+
+    void Pod::setNextCheckpoint(int nextCheckpoint) {
+        this->nextCheckpoint = nextCheckpoint;
     }
 
     void Pod::setHealth(float health) {

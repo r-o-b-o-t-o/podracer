@@ -11,6 +11,10 @@ namespace Shared {
             float getY() const;
             float getVx() const;
             float getVy() const;
+            void setX(float x);
+            void setY(float y);
+            void setVx(float vx);
+            void setVy(float vy);
             float getRadius() const;
             float getMass() const;
             void setMass(float m);

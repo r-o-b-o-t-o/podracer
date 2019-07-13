@@ -10,8 +10,11 @@ namespace Shared {
         Pod(float x, float y, float vx, float vy, float direction);
 
         float getDirection() const;
+        void setDirection(float direction);
         float getHealth() const;
         void setHealth(float health);
+        int getNextCheckpoint() const;
+        void setNextCheckpoint(int nextCheckpoint);
 
         void turn(float angleInDegrees);
         void thrust(float power);

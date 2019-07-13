@@ -9,6 +9,7 @@ namespace Shared {
     public:
         Turn();
         static Turn parse(const Messaging::Values &values);
+        void update(const Messaging::Values &values);
         Message toMessage(int player);
 
         unsigned long long numberOfPlayers() const;
