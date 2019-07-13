@@ -9,30 +9,6 @@ namespace Shared {
 
     }
 
-    Turn Turn::parse(const Messaging::Values &values) {
-        Turn turn {};
-        for (auto it = values.begin(); it < values.end(); ++it) {
-            auto line = *it;
-
-            int playerIdx = std::stoi(line[0]) - 1;
-            float x = std::stoi(line[2]);
-            float y = std::stoi(line[3]);
-            float vx = std::stof(line[4]);
-            float vy = std::stof(line[5]);
-            float direction = std::stof(line[6]);
-            float health = std::stof(line[7]);
-            Pod pod(x, y, vx, vy, direction);
-            pod.setHealth(health);
-
-            if (turn.playerStates.size() <= playerIdx) {
-                turn.playerStates.emplace_back();
-            }
-            turn.playerStates[playerIdx].push_back(pod);
-        }
-
-        return turn;
-    }
-
     void Turn::update(const Messaging::Values &values) {
         for (auto it = values.begin(); it < values.end(); ++it) {
             auto line = *it;

@@ -23,6 +23,7 @@ namespace Window {
         void update(const sf::Event &e);
         void draw(sf::RenderWindow &window) const;
         void drawUi(sf::RenderWindow &window) const;
+        void debug(sf::RenderWindow &window) const;
 
     private:
         int x;
@@ -30,7 +31,6 @@ namespace Window {
         int playerIdx;
         int podIdx;
         int model;
-        float health;
         int currentSprite;
         sf::Sprite sprites[5];
         std::vector<Checkpoint*> collidingCheckpoints;
@@ -38,6 +38,7 @@ namespace Window {
 
         const sf::Sprite &getSprite() const;
         static int getModelId(int playerIdx, int podIdx);
+        sf::CircleShape debugBounds;
     };
 }
 

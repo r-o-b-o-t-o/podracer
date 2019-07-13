@@ -15,15 +15,22 @@ namespace Window {
         for (int i = 1; i <= 4; ++i) {
             const sf::Texture* texture = textureLoader.get("pod_" + std::to_string(this->model) + "/" + std::to_string(i));
             sf::Sprite sprite(*texture);
-            sf::FloatRect bounds = sprite.getLocalBounds();
+            sf::FloatRect bounds = sprite.getGlobalBounds();
             sprite.setOrigin(bounds.width / 2.0f, bounds.height / 2.0f);
-            sprite.setScale(0.5f, 0.5f);
+            float scale = Shared::Pod::RADIUS * 2.0f / static_cast<float>(texture->getSize().x);
+            sprite.setScale(scale, scale);
 
             this->sprites[i - 1] = sprite;
         }
 
         this->setHealth(100.0f);
         this->setRotation(0.0f);
+
+        this->debugBounds = sf::CircleShape(Shared::Pod::RADIUS);
+        this->debugBounds.setOrigin(Shared::Pod::RADIUS, Shared::Pod::RADIUS);
+        this->debugBounds.setOutlineColor(sf::Color::Cyan);
+        this->debugBounds.setFillColor(sf::Color::Transparent);
+        this->debugBounds.setOutlineThickness(2.0f);
     }
 
     const sf::Sprite &Pod::getSprite() const {
@@ -37,8 +44,6 @@ namespace Window {
             health = 100.0f;
         }
 
-        this->health = health;
-
         int modelsCount = 4;
         this->currentSprite = std::min(static_cast<int>((100.0f - health) / (100.0f / modelsCount)), modelsCount - 1);
         this->tooltip.setHealth(health);
@@ -50,6 +55,7 @@ namespace Window {
         for (sf::Sprite &sprite : this->sprites) {
             sprite.setPosition(x, y);
         }
+        this->debugBounds.setPosition(x, y);
     }
 
     void Pod::setRotation(float angle) {
@@ -101,6 +107,10 @@ namespace Window {
 
     void Pod::draw(sf::RenderWindow &window) const {
         window.draw(this->getSprite());
+    }
+
+    void Pod::debug(sf::RenderWindow &window) const {
+        window.draw(this->debugBounds);
     }
 
     void Pod::drawUi(sf::RenderWindow &window) const {

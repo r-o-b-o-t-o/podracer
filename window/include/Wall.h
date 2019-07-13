@@ -8,7 +8,8 @@ namespace Window {
     public:
         explicit Wall(const TextureLoader &textureLoader, int x, int y, int radius);
 
-        const sf::Sprite &getSprite() const;
+        void draw(sf::RenderWindow &window) const;
+        void debug(sf::RenderWindow &window) const;
 
     private:
         int x;
@@ -16,7 +17,7 @@ namespace Window {
         int radius;
 
         sf::Sprite sprite;
-
+        sf::CircleShape debugBounds;
     };
 }
 

@@ -20,9 +20,20 @@ namespace Window {
         this->sprite.setPosition(x, y);
         float scale = radius * 2.0f / static_cast<float>(this->sprite.getTexture()->getSize().x);
         this->sprite.setScale(scale, scale);
+
+        this->debugBounds = sf::CircleShape(radius);
+        this->debugBounds.setPosition(x, y);
+        this->debugBounds.setOrigin(radius, radius);
+        this->debugBounds.setOutlineColor(sf::Color::Cyan);
+        this->debugBounds.setFillColor(sf::Color::Transparent);
+        this->debugBounds.setOutlineThickness(2.0f);
     }
 
-    const sf::Sprite &Wall::getSprite() const {
-        return this->sprite;
+    void Wall::draw(sf::RenderWindow &window) const {
+        window.draw(this->sprite);
+    }
+
+    void Wall::debug(sf::RenderWindow &window) const {
+        window.draw(this->debugBounds);
     }
 }

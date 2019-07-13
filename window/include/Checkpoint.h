@@ -13,6 +13,7 @@ namespace Window {
         explicit Checkpoint(const FontLoader &fontLoader, int idx, int x, int y, int radius);
 
         void draw(sf::RenderWindow &window) const;
+        void debug(sf::RenderWindow &window) const;
 
         void collisionEnter();
         void collisionExit();
@@ -29,6 +30,7 @@ namespace Window {
 
         sf::Text text;
         sf::CircleShape shape;
+        sf::CircleShape debugBounds;
         static sf::Color enabledColor;
         static sf::Color disabledColor;
 

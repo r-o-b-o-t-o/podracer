@@ -17,6 +17,7 @@ int main() {
     window.setVerticalSyncEnabled(true);
     sf::Event event {};
     sf::Color clearColor(40, 40, 40);
+    bool debug = false;
 
     Shared::Settings settings;
     std::vector<Pod> pods;
@@ -51,6 +52,7 @@ int main() {
         }
     });
 
+    Shared::Turn turn;
     while (window.isOpen()) {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
@@ -60,6 +62,10 @@ int main() {
             } else if (event.type == sf::Event::KeyReleased) {
                 if (event.key.code == sf::Keyboard::Key::Escape) {
                     window.close();
+                    break;
+                }
+                if (event.key.code == sf::Keyboard::Key::D) {
+                    debug = !debug;
                     break;
                 }
             } else if (event.type == sf::Event::MouseMoved) {
@@ -73,12 +79,21 @@ int main() {
 
         for (const Checkpoint &checkpoint : checkpoints) {
             checkpoint.draw(window);
+            if (debug) {
+                checkpoint.debug(window);
+            }
         }
         for (const Pod &pod : pods) {
             pod.draw(window);
+            if (debug) {
+                pod.debug(window);
+            }
         }
         for (const Wall &wall : walls) {
-            window.draw(wall.getSprite());
+            wall.draw(window);
+            if (debug) {
+                wall.debug(window);
+            }
         }
         for (const Pod &pod : pods) {
             pod.drawUi(window);
@@ -87,7 +102,7 @@ int main() {
         window.display();
 
         messaging.read("turn", [&](const Shared::Messaging::Values &values) {
-            Shared::Turn turn = Shared::Turn::parse(values);
+            turn.update(values);
 
             int playerIdx = 0;
             for (auto &playerState : turn.getPlayerStates()) {

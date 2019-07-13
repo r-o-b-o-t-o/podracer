@@ -16,8 +16,7 @@ namespace Window {
         this->shape.setOutlineThickness(radius / 16.0f);
         this->applyCollisionEffect();
         this->shape.setFillColor(sf::Color::Transparent);
-        sf::FloatRect bounds = this->shape.getLocalBounds();
-        this->shape.setOrigin(bounds.width / 2.0f, bounds.height / 2.0f);
+        this->shape.setOrigin(radius, radius);
         this->shape.setPosition(x, y);
 
         this->text.setFont(*fontLoader.get("kenvector_future_thin"));
@@ -25,15 +24,26 @@ namespace Window {
         this->text.setString(textContent);
         this->text.setCharacterSize(static_cast<unsigned int>(std::round(radius * 0.75f)));
         this->text.setFillColor(sf::Color::White);
-        bounds = this->shape.getGlobalBounds();
+        sf::FloatRect bounds = this->shape.getGlobalBounds();
         sf::FloatRect textBounds = this->text.getGlobalBounds();
         this->text.setPosition(bounds.left + (bounds.width - textBounds.width) / 2.0f,
                                bounds.top + (bounds.height - textBounds.height) / 2.0f - text.getLocalBounds().top);
+
+        this->debugBounds = sf::CircleShape(radius);
+        this->debugBounds.setPosition(x, y);
+        this->debugBounds.setOrigin(radius, radius);
+        this->debugBounds.setOutlineColor(sf::Color::Cyan);
+        this->debugBounds.setFillColor(sf::Color::Transparent);
+        this->debugBounds.setOutlineThickness(2.0f);
     }
 
     void Checkpoint::draw(sf::RenderWindow &window) const {
         window.draw(this->shape);
         window.draw(this->text);
+    }
+
+    void Checkpoint::debug(sf::RenderWindow &window) const {
+        window.draw(this->debugBounds);
     }
 
     void Checkpoint::collisionEnter() {
