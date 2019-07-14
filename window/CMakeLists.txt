@@ -33,12 +33,12 @@ set_target_properties(window PROPERTIES OUTPUT_NAME "podracer-window")
 
 
 # Copy assets to target location
-foreach (file ${assets})
-    if (NOT IS_DIRECTORY ${file})
-        STRING(REGEX REPLACE "^${assets_dir}/" "" file_dest_name ${file})
-        configure_file(${file} ${CMAKE_CURRENT_BINARY_DIR}/assets/${file_dest_name} COPYONLY)
-    endif ()
-endforeach ()
+#foreach (file ${assets})
+#    if (NOT IS_DIRECTORY ${file})
+#        STRING(REGEX REPLACE "^${assets_dir}/" "" file_dest_name ${file})
+#        configure_file(${file} ${CMAKE_CURRENT_BINARY_DIR}/assets/${file_dest_name} COPYONLY)
+#    endif ()
+#endforeach ()#
 
 
 # Shared classes

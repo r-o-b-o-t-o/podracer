@@ -103,10 +103,10 @@ namespace Shared {
             float v1nf = (v1n * (this->m - other.m) + 2 * other.m * v2n) / (this->m + other.m);
             float v2nf = (v2n * (other.m - this->m) + 2 * this->m * v1n) / (this->m + other.m);
 
-            this->vx = v1nf * unx + v1t * utx;
-            this->vy = v1nf * uny + v1t * uty;
-            other.vx = v2nf * unx + v2t * utx;
-            other.vy = v2nf * uny + v2t * uty;
+            this->vx = (v1nf * unx + v1t * utx) / 5;
+            this->vy = (v1nf * uny + v1t * uty) / 5;
+            other.vx = (v2nf * unx + v2t * utx) / 5;
+            other.vy = (v2nf * uny + v2t * uty) / 5;
         }
 
         bool Entity::intersects(const Entity &other) const {

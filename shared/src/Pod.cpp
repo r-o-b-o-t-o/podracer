@@ -6,8 +6,8 @@
 namespace Shared {
     const float Pod::RADIUS = 26.0f;
     const float Pod::FRICTION = 0.005f;
-    const float Pod::MAX_TURN = 15.0f;
-    const float Pod::MAX_THRUST = 100.0f;
+    const float Pod::MAX_TURN = 100.0f;
+    const float Pod::MAX_THRUST = 250.0f;
 
     Pod::Pod(float x, float y, float vx, float vy, float direction) :
             Entity(x, y, RADIUS, 1.0f, vx, vy),
