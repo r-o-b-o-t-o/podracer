@@ -12,7 +12,8 @@ public:
     void exportLevel(const std::string &file);
 
 private:
-    void init();
+    void initTrack();
+    void initRandomMap();
     void readPlayers();
     void run();
     int update();

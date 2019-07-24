@@ -13,7 +13,7 @@ int main() {
     TextureLoader textureLoader;
     FontLoader fontLoader;
 
-    sf::RenderWindow window(sf::VideoMode(800, 600), L"Ｐ Ｏ Ｄ 　Ｒ Ａ Ｃ Ｅ Ｒ");
+    sf::RenderWindow window(sf::VideoMode(1000, 800), L"Ｐ Ｏ Ｄ 　Ｒ Ａ Ｃ Ｅ Ｒ");
     window.setVerticalSyncEnabled(true);
     sf::Event event {};
     sf::Color clearColor(40, 40, 40);

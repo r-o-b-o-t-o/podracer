@@ -8,6 +8,8 @@ namespace Shared {
 
     }
 
+    Wall::Wall(const Shared::Physics::Entity &e) : Entity(e) {}
+
     Settings Settings::parse(const Messaging::Values &values) {
         Settings settings {};
         for (auto it = values.begin(); it < values.end(); ++it) {

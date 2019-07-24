@@ -10,6 +10,7 @@ namespace Shared {
     class Wall : public Physics::Entity {
     public:
         Wall(float x, float y, float radius);
+        Wall(const Physics::Entity &e);
     };
 
     typedef Wall Checkpoint;

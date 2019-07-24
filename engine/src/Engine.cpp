@@ -3,27 +3,143 @@
 #include "Engine.h"
 #include "Timer.h"
 #include "Action.h"
+#include "Random.h"
+#include "Physics.h"
 
 #include "json.hpp"
 
-Engine::Engine(int podsPerPlayer, const std::string &importExport) :
-        numberOfPlayers(podsPerPlayer) {
+Engine::Engine(int podsPerPlayer, const std::string &importExport) {
+    this->settings.setPodsPerPlayer(podsPerPlayer);
+    this->settings.setWidth(1000);
+    this->settings.setHeight(800);
 
-    this->settings.setPodsPerPlayer(2);
-    this->settings.setWidth(1920);
-    this->settings.setHeight(1080);
-
+    this->readPlayers();
     if (importExport.empty()) {
-        this->init();
+        this->initRandomMap();
+    } else if (importExport == "track") {
+        this->initTrack();
     } else {
         this->handleImportExport(importExport);
     }
-    this->readPlayers();
     this->messaging.write(this->settings.toMessage());
     this->run();
 }
 
-void Engine::init() {
+void Engine::initRandomMap() {
+    using namespace Shared;
+
+    int nbWalls = Random::getInt(3, 6);
+    int nbCheckpoints = Random::getInt(2, 4);
+
+    auto getRandomEntity = [&](bool* success) {
+        Physics::Entity entity(0.0f, 0.0f, 0.0f);
+        int tries = 0;
+        int maxTries = 100;
+        float border = 120.0f + Pod::RADIUS;
+
+        while (true) {
+            float x = Random::getFloat(border, this->settings.getWidth() - border);
+            float y = Random::getFloat(border, this->settings.getHeight() - border);
+            float radius = Random::getFloat(20.0f, 50.0f);
+            entity = Physics::Entity(x, y, radius);
+            bool valid = true;
+
+            std::vector<Shared::Physics::Entity> entities;
+            entities.insert(entities.end(), this->settings.getCheckpoints().begin(), this->settings.getCheckpoints().end());
+            entities.insert(entities.end(), this->settings.getWalls().begin(), this->settings.getWalls().end());
+
+            for (const Physics::Entity &other : entities) {
+                if (Shared::Physics::circlesOverlap(
+                        x, y, radius + Shared::Pod::RADIUS * 2.0f,
+                        other.getX(), other.getY(), other.getRadius() + Shared::Pod::RADIUS * 2.0f
+                )) {
+                    valid = false;
+                    break;
+                }
+            }
+
+            if (valid) {
+                *success = true;
+                break;
+            }
+
+            tries++;
+            if (tries > maxTries) {
+                *success = false;
+                break;
+            }
+        }
+
+        return entity;
+    };
+
+    bool success;
+    this->settings.getWalls().clear();
+    for (int i = 0; i < nbWalls; ++i) {
+        auto entity = getRandomEntity(&success);
+        if (success) {
+            this->settings.addWall(entity);
+        }
+    }
+    this->settings.getCheckpoints().clear();
+    for (int i = 0; i < nbCheckpoints; ++i) {
+        auto entity = getRandomEntity(&success);
+        if (success) {
+            this->settings.addCheckpoint(entity);
+        }
+    }
+
+    if (this->settings.getCheckpoints().empty()) {
+        this->initRandomMap();
+    }
+
+    auto &players = this->gameState.getPlayerStates();
+    players.clear();
+    int side = Random::getInt(0, 3);
+    float startX = 0.0f;
+    float startY = 0.0f;
+    float offset = Pod::RADIUS * 3.0f;
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+
+    if (side == 0) {
+        startX = this->settings.getWidth() / 2.0f;
+        startY = 40.0f;
+        offsetX = offset;
+    } else if (side == 1) {
+        startX = this->settings.getWidth() - 40.0f;
+        startY = this->settings.getHeight() / 2.0f;
+        offsetY = offset;
+    } else if (side == 2) {
+        startX = this->settings.getWidth() / 2.0f;
+        startY = this->settings.getHeight() - 40.0f;
+        offsetX = offset;
+    } else if (side == 3) {
+        startX = 40.0f;
+        startY = this->settings.getHeight() / 2.0f;
+        offsetY = offset;
+    }
+
+    int i = -(this->numberOfPlayers * this->settings.getPodsPerPlayer()) / 2;
+    for (int playerIdx = 0; playerIdx < this->numberOfPlayers; ++playerIdx) {
+        std::vector<Shared::Pod> pods;
+
+        for (int podIdx = 0; podIdx < this->settings.getPodsPerPlayer(); ++podIdx) {
+            float x = startX + i * offsetX;
+            float y = startY + i * offsetY;
+            pods.emplace_back(x, y, 0.0f, 0.0f, 0.0f);
+
+            i++;
+        }
+
+        players.push_back(pods);
+    }
+}
+
+void Engine::initTrack() {
+    this->settings.setWidth(1920);
+    this->settings.setHeight(1080);
+
     //road 01
     for (int i = 1; i <= 24; ++i) {
         this->settings.addWall(Shared::Wall(-500 + i * 50.0f, -150.0f, 25.0f));
@@ -97,25 +213,26 @@ void Engine::init() {
     this->settings.addCheckpoint(Shared::Checkpoint(50.0f, 650.0f, 36.0f));
     this->settings.addCheckpoint(Shared::Checkpoint(-325.0f, 650.0f, 36.0f));
     this->settings.addCheckpoint(Shared::Checkpoint(-325.0f, 0.0f, 36.0f));
+
+    //Players
+    std::vector<std::vector<Shared::Pod>> &players = this->gameState.getPlayerStates();
+    players.clear();
+    for (int playerIdx = 0; playerIdx < this->numberOfPlayers; ++playerIdx) {
+        std::vector<Shared::Pod> pods;
+
+        for (int podIdx = 0; podIdx < this->settings.getPodsPerPlayer(); ++podIdx) {
+            float x = -200.0f + (this->settings.getPodsPerPlayer() * podIdx) * 30.0f;
+            float y = -30.0f + (this->settings.getPodsPerPlayer() * playerIdx) * 30.0f;
+            pods.emplace_back(x, y, 0.0f, 0.0f, 0.0f);
+        }
+
+        players.push_back(pods);
+    }
 }
 
 void Engine::readPlayers() {
     this->messaging.read("players", [&](const Shared::Messaging::Values &values) {
         this->numberOfPlayers = std::stoi(values[0][0]);
-
-        std::vector<std::vector<Shared::Pod>> &players = this->gameState.getPlayerStates();
-        players.clear();
-        for (int playerIdx = 0; playerIdx < this->numberOfPlayers; ++playerIdx) {
-            std::vector<Shared::Pod> pods;
-
-            for (int podIdx = 0; podIdx < this->settings.getPodsPerPlayer(); ++podIdx) {
-                float x = -200.0f + (this->settings.getPodsPerPlayer() * podIdx) * 30.0f;
-                float y = -30.0f + (this->settings.getPodsPerPlayer() * playerIdx) * 30.0f;
-                pods.emplace_back(x, y, 0.0f, 0.0f, 0.0f);
-            }
-
-            players.push_back(pods);
-        }
     });
 }
 
@@ -299,7 +416,7 @@ void Engine::handleImportExport(std::string file) {
     if (action == '<') {
         this->importLevel(file);
     } else if (action == '>') {
-        this->init();
+        this->initRandomMap();
         this->exportLevel(file);
     }
 }
